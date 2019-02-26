@@ -1,0 +1,32 @@
+PARAMS = -std=c99 -Wall -g
+leak-check = yes
+track-origins = yes
+wff = "(and (= (+ (* -2 x) (* 2 a) (* 3 b) (* 3 c)) 3) (> (+ (* 5 x) (* 3 c)) 1) (div (+ (* 2 x) (* 2 y)) 1))"
+#wff = "(and (= (+ (* 2 x) (* 1 y)) 4))"
+var = "x y a b c"
+
+test: test.c cooper.o
+	gcc $(PARAMS) test.c cooper.o -o test
+
+cooper.o: cooper.c cooper.h
+	gcc $(PARAMS) -c cooper.c -o cooper.o
+
+run: test
+	time ./test $(wff) x
+
+sat: test sat.py
+	./sat.py $(wff) $(var)
+
+valgrind: test
+	valgrind --track-origins=$(track-origins) --leak-check=$(leak-check) ./test $(wff) x
+
+debug: test
+	gdb --args test $(wff) $(var)
+
+eval: test
+	./eval.scm "`./test $(wff) $(var) | tail -n 1`"
+
+clean:
+	rm -f *.o
+	rm test
+

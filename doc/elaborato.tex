@@ -1,0 +1,163 @@
+\documentclass[11pt,letterpaper,twoside]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage[italian]{babel}
+\usepackage{minted}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+
+\begin{document}
+
+\title{%
+  Algoritmo di eliminazione dei quantificatori di Cooper\\
+  \large una semplice implementazione scritta in linguaggio C}
+\author{Andrea Ciceri}
+\maketitle
+
+\begin{abstract}
+  L'algoritmo di Cooper permette di effettuare l'eliminazione dei quantificatori
+  universali da formule dell'aritmetica di Presburger. In questo documento
+  verr\`a descritto l'algoritmo e verr\`a discussa una semplice implementazione
+  in C di una versione ridotta dell'algoritmo atta ad interfacciarsi al
+  software di model checking MCMT.  
+\end{abstract}
+
+\section{Aritmetica di Presburger}
+Sia $\mathbb{Z}$ l'anello degli interi, sia $\Sigma_{\mathbb{Z}}$ la segnatura
+$\{0, +, -, <\}$ e sia $\mathcal{A}_{\mathbb{Z}}$ il modello standard degli
+interi.
+Definiamo la teoria dell'\textbf{aritmetica di Presburger} come l'insieme
+$T_{\mathbb{Z}}=Th(\mathcal{A}_{\mathbb{Z}})=Th(\mathbb{Z}, 0, 1, +, -, <)$ di
+tutte le $\Sigma_{\mathbb{Z}}$-formule vere in $\mathcal{A}_{\mathbb{Z}}$.
+Tale teoria non ammette l'eliminazione dei quantificatori.
+
+Consideriamo ora la segnatura estesa $\Sigma_{\mathbb{Z}}^*$ ottenuta aggiungendo
+a $\Sigma_{\mathbb{Z}}$ un'infinit\`a di predicati unari di divisibilt\`a $D_k$
+per ogni $k \ge 2$, dove $D_k(x)$ indica che $x \equiv_k 0$.
+Sia $T_{\mathbb{Z}}^*$ l'insieme delle $\Sigma_{\mathbb{Z}}$-formule vere
+nell'espansione $\mathcal{A}_{\mathbb{Z}}^\star$ ottenuta da
+$\mathcal{A}_{\mathbb{Z}}$.
+
+Nel \date{1930} Moj\.zesz Presburger ha esibito un algoritmo di eliminazione dei
+quantificatori per $T_{\mathbb{Z}}^*$ e nel \date{1972} Cooper ha fornito una
+versione migliorata basata sull'eliminazione dei quantificatori da formule nella
+forma $\exists \,x \,.\, \varphi$, dove $\varphi$ \`e una formula senza
+quantificatori arbitraria.
+
+
+\section{L'algoritmo}
+Si ha quindi che l'algoritmo ha come ingresso una formula del tipo $\exists
+\,x \,.\, \varphi$ e come uscita una una formula equivalente senza il
+quantificatore esistenziale. Se si vogliono eliminare pi\`u quantificatori
+esistenziali basta reiterare l'algoritmo.
+
+Si osserva come ovviamente ogni formula contenente quantificatori universali
+possa essere trasformata in una formula equivalente con soli quantificatori
+esistenziali.
+Pertanto non si ha una perdita di generalit\'a ad assumere un input in tale
+forma.
+
+\subsection{Processo di semplificazione}
+In questo passaggio vengono effettuate le seguenti semplificazioni alla formula
+in ingresso $\varphi$:
+\begin{itemize}
+\item Tutti i connettivi logici composti, cio\`e che non sono $\lnot$, $\land$ o
+  $\lor$, vengono sostituiti nella loro definizione in termini di $\lnot$,
+  $\land$ o $\lor$.
+\item I predicati binari $\ge$ e $\le$ vengono sostituiti con le loro
+  definizioni (e.g. $s \le t$ diventa $s < t + 1$). 
+\item Le diseguaglianze negate della forma $\lnot (s < t)$ vengono sostituite
+  con $t < s + 1$.
+\item Tutte le equazioni e le disequazioni vengono riscritte in modo da avere
+  $0$ nel lato sinistro ($s=t$ e $s<t$ diventano $0=t-s$ e $0<t-s$).
+\item Tutti gli argomenti dei predicati vengono sostituiti con la loro forma
+  canonica.
+\end{itemize}
+Dopo aver applicato queste sostituzioni e aver trasformato la $\varphi$ ottenuta
+in forma normale negativa possiamo dunque assumere che $\varphi$ sia
+congiunzione e disgiunzione dei seguenti tipi di letterali:
+
+$$0=t \qquad \lnot(0=t) \qquad 0<t \qquad D_k(t) \qquad \lnot D_k(t)$$
+Diremo che $\varphi$ in tale forma \'e una \textbf{formula ristretta}.
+
+\subsection{Normalizzazione dei coefficienti}
+Assumiamo quindi che l'algoritmo riceva in ingresso $\exists \, x \, . \,
+\varphi$ con $\varphi$ formula ristretta. Il primo passaggio consiste nel
+trasformare $\varphi$ in una formula dove il coefficiente della $x$ \`e sempre
+lo stesso. Per fare questo \`e sufficiente calcolare il minimo comune multiplo
+$l$ di tutti i coefficienti di $x$ ed effettuare i seguenti passi:
+\begin{itemize}
+  \item Per le equazioni e le equazioni negate, rispettivamente nella forma
+    $0=t$ e $\lnot (0=t)$, si moltiplica $t$  per $l/c$, dove $c$ indica il
+    coefficiente della $x$.
+  \item Analogamente, per i predicati di divisibilit\`a $D_k(t)$ e i predicati
+    di divisibilt\`a negati $\lnot D_k(t)$ si moltiplica sia $t$ che $k$ per
+    $l/c$, sempre dove $c$ indica il coefficiente della $x$.
+  \item Per le diseguaglianze $0<t$ si moltiplica $t$ per il valore assoluto
+    $l/c$, dove ancora un volta $c$ indica il coefficiente della $x$.
+  \end{itemize}
+
+Quindi ora tutti i coefficienti della $x$ in $\varphi$ sono $\pm l$, passiamo
+ora a considerare la seguente formula equivalente:
+
+$$ \exists \, x . \, (D_l(x) \land \psi)  $$
+dove $\psi$ \`e ottenuta da $\varphi$\ sostituendo $l \cdot x$ con $x$.
+Dunque la formula $\varphi' = D_l(x) \land \psi$ \`e una formula ristretta dove
+i coefficienti della $x$ sono $\pm 1$.
+
+\subsection{Costruzione di $\varphi'_{- \infty}$}
+Definiamo una nuova formula $\varphi'_{- \infty}$ ottenuta partendo da
+$\varphi'$ e sostituendo tutte le formule atomiche $\alpha$ con $\alpha_{-
+  \infty}$ secondo la seguente tabella:
+
+\begin{center}
+  \begin{tabular}{ l | c }
+    $\alpha$ & $\alpha_{- \infty}$ \\ \hline
+    $0=t$ & falso \\
+    $0 < t$ con $1 \cdot x$ in $t$ & falso \\
+    $0 < t$ con $-1 \cdot x$ in $t$ & vero \\
+    ogni altra formula atomica $\alpha$ & $\alpha$ \\
+  \end{tabular}
+\end{center}
+
+\subsection{Calcolo dei boundary points}
+Ad ogni letterale $L[x]$ di $\varphi '$ contenente la $x$ che non \`e un
+predicato di divisibilit\`a associamo un intero, detto \textbf{boundary point},
+nel seguente modo:
+
+\begin{center}
+  \begin{tabular}{ l | c }
+    Tipo di letterale & Boundary point \\ \hline
+    $0=x+t$ & il valore di $(-t + 1)$ \\
+    $\lnot (0 < x+t)$ & il valore di $-t$ \\
+    $0 < x + t$ & il valore di $-t$ \\
+    $0 < -x + t$ &  niente
+  \end{tabular}
+\end{center}
+Si osserva come nel caso la formula $\varphi$ contenga pi\`u variabili da eliminare
+allora i valori nella colonna di destra possano dipendere da altre variabili.
+Chiamiamo $B$-set l'insieme di questi boundary points.
+
+\subsection{Eliminazione dei quantificatori}
+Quest'ultimo passaggio \`e semplicemente l'applicazione della seguente
+equivalenza:
+
+$$ \exists \, x \, . \, \varphi'[x] \longleftrightarrow \bigvee_{j=1}^m \Big(
+\varphi'_{- \infty}[j] \lor \bigvee_{b \in B}(\varphi'[b+j]) \Big)$$
+dove $\varphi'$ \`e la formula ristretta in cui i coefficienti della $x$ sono
+sempre $\pm 1$, $m$ \`e il minimo comune multiplo di tutti i $k$ dei predicati
+di divisbilit\`a $D_k(t)$ che appaiono in $\varphi'$ tali che appaia la $x$ in
+$t$ e infine $B$ \`e il $B$-set relativo a $\varphi'$.
+Considerando quindi il lato destro della precedente equivalenza si ha una
+formula priva del quantificatore esistenziale e si ha dunque ottenuto ci\`o che
+si voleva.
+
+\section{Implementazione}
+Il software \`e stato scritto nel linguaggio C rispettando lo standard C99
+
+\end{document}
+
+
+%%% TeX-command-extra-options: "-shell-escape"
