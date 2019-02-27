@@ -1,7 +1,0 @@
-(define x::int)
-(define y::int)
-(define a::int)
-(define b::int)
-(define c::int)
-(assert (or false (and (= (+ (+ (* -1 y) 4) (* 1 y)) 4) (div (+ (* -1 y) 4) 2)) false (and (= (+ (+ (* -1 y) 5) (* 1 y)) 4) (div (+ (* -1 y) 5) 2))))
-(check)
