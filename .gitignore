@@ -4,8 +4,11 @@ test
 *.log
 *.aux
 #*#
+.#*
 doc/auto/*
 *.pdf
 *~
 *.hs
 _minted*
+*.ys
+*.toc
