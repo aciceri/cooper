@@ -7,8 +7,19 @@
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \usepackage{amsfonts}
 \usepackage{amsthm}
+\usepackage{tikz}
+
+
+\usetikzlibrary{shapes.geometric, arrows}
+\tikzstyle{io} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black]
+\tikzstyle{procedure} = [rectangle, minimum width=3cm, minimum height=1cm,text centered, draw=black]
+\tikzstyle{arrow} = [thick,->,>=stealth]
 
 \begin{document}
+
+\newcommand{\src}[2]{\inputminted[linenos, firstline={#1},
+  lastline={#2}]{C}{../cooper.c}}
+\newcommand{\inline}[1]{\mintinline{C}{#1}}
 
 \title{%
   Algoritmo di eliminazione dei quantificatori di Cooper\\
@@ -155,7 +166,72 @@ formula priva del quantificatore esistenziale e si ha dunque ottenuto ci\`o che
 si voleva.
 
 \section{Implementazione}
-Il software \`e stato scritto nel linguaggio C rispettando lo standard C99
+Il software \`e stato scritto nel linguaggio C rispettando lo standard C99, in
+questo capitolo verrà effettuata una discussione riguardo l'implementazione.
+
+\subsection{Struttura e design}
+L'algoritmo \`e stato suddiviso in svariate procedure, implementate come singole
+funzioni in C, è possibile eseguire l'intero algoritmo chiamando la funzione
+\inline{char* cooper(char* wff, char* var)}, dove \inline{wff} è una formula ben
+formata (well-formed formula) nel linguaggio SMT-LIB e \inline{var} è la
+variabile da eliminare.
+Naturalmente la funzione restituisce la formula equivalente priva della
+variabile.
+Si rimanda a più tardi la discussione della forma esatta che deve avere la
+formula in ingresso.
+
+La funzione \inline{cooper} effettua quindi a sua volta delle chiamate a varie
+funzioni, si è cercato per quanto possibile di mantenere la suddivisione di
+queste sotto-procedure fedele alla descrizione dell'algoritmo svolta
+precedentemente.
+
+\begin{center}
+\begin{tikzpicture}[node distance=2cm]
+  \node (input) [io] {Formula in ingresso};
+  \node (parse) [procedure, below of=input] {\inline{parse();}};
+  \node (normalize) [procedure, below of=parse] {\inline{normalize();}};
+  \node (minInf) [procedure, below of=normalize, xshift=-3cm] {\inline{minInf();}};
+  \node (boundaryPoints) [procedure, below of=normalize, xshift=3cm] {\inline{boundaryPoints();}};
+  \node (newFormula) [procedure, below of=minInf, xshift=3cm] {\inline{newFormula();}};
+  \node (output) [io, below of=newFormula] {Formula equivalente};
+  \draw [arrow] (input) -- (parse);
+  \draw [arrow] (parse) -- (normalize);
+  \draw [arrow] (normalize) -- (minInf);
+  \draw [arrow] (normalize) -- (boundaryPoints);
+  \draw [arrow] (minInf) -- (newFormula);
+  \draw [arrow] (boundaryPoints) -- (newFormula);
+  \draw [arrow] (newFormula) -- (output);
+\end{tikzpicture}
+\end{center}
+
+La funzione parse blah blah
+
+\subsection{Analisi del codice}
+
+
+\section{Utilizzo}
+In questo capitolo verranno forniti alcuni semplici esempi di utilizzo.
+
+\subsection{Script ausiliari}
+
+\subsection{Esempi pratici}
+
+
+\newpage
+\tableofcontents
+
+
+\begin{thebibliography}{9}
+
+\bibitem{lamport94}
+  Leslie Lamport,
+  \textit{\LaTeX: a document preparation system},
+  Addison Wesley, Massachusetts,
+  2nd edition,
+  1994.
+
+
+\end{thebibliography}
 
 \end{document}
 

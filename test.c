@@ -3,7 +3,7 @@
 
 int main(int argc, char** argv) {
     if (argc == 3)
-        printf("", cooper(argv[1], argv[2]));
+        printf("%s", cooper(argv[1], argv[2]));
     else
         printf("Wrong arguments number!");
 
