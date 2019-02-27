@@ -17,7 +17,7 @@
 
 \begin{document}
 
-\newcommand{\src}[2]{\inputminted[linenos, firstline={#1},
+\newcommand{\src}[2]{\inputminted[linenos, mathescape=true, firstline={#1},
   lastline={#2}]{C}{../cooper.c}}
 \newcommand{\inline}[1]{\mintinline{C}{#1}}
 
@@ -204,9 +204,42 @@ precedentemente.
 \end{tikzpicture}
 \end{center}
 
-La funzione parse blah blah
+Prima di spiegare il comportamento delle singole funzioni occorre accennare che
+l'oggetto principale manipolato dal programma è l'albero sintattico stesso della
+formula. Per ottenere ciò si è creato un tipo strutturato chiamato
+\inline{t_syntaxTree} ad hoc. Si rimanda a più tardi una discussione
+dettagliata del tipo in questione.
+
+La funzione che ha quindi il compito di effettuare il parsing è
+\inline{t_syntaxTree* parse(char* wff)}, ed è questo appena introdotto il tipo
+che ritorna.
+
+Il passo successivo al parsing è la normalizzazione della formula, cioè la generazione
+della formula $\varphi' = D_l(x) \land \psi$, dove i coefficienti della variabile
+da eliminare sono diventati $1$. La segnatura di tale funzione è \inline{void
+  normalize(t_syntaxTree* tree, char* var)}.
+
+Le funzioni \inline{t_syntaxTree* minInf(t_syntaxTree* tree, char* var)} e \newline
+\inline{t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var)}, come è
+facile evincere, generano rispettivamente $\varphi_{- \infty}$ e l'insieme dei
+boundary points.
+
+Infine \inline{t_syntaxTree* newFormula(t_syntaxTree* tree,
+  t_syntaxTree* minf, char* var)} genera la formula equivalente a partire da
+$\varphi_{- \infty}$ e della formula normalizzata. \`E al suo interno che viene
+effettuata la chiamata a \inline{boundaryPoints();}.
+
+Esiste inoltre un ulteriore passo opzionale non facente parte dell'algoritmo di
+Cooper, la funzione \inline{void simplify(t_syntaxTree* t)}, che può essere
+chiamata passando come argomento l'output di \inline{newFormula()}, effettua una
+rozza semplificazione della formula. Verrà discusso successivamente in dettaglio
+cosa si intende. 
 
 \subsection{Analisi del codice}
+Quella che viene presentata qui è un'analisi dettagliata del codice sorgente del
+programma riga per riga.
+
+\src{521}{600}
 
 
 \section{Utilizzo}
