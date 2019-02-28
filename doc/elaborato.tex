@@ -8,7 +8,9 @@
 \usepackage{amsfonts}
 \usepackage{amsthm}
 \usepackage{tikz}
+\usepackage[backend=bibtex,style=verbose-trad2]{biblatex}
 
+\bibliography{elaborato} 
 
 \usetikzlibrary{shapes.geometric, arrows}
 \tikzstyle{io} = [rectangle, rounded corners, minimum width=3cm, minimum
@@ -155,7 +157,7 @@ Chiamiamo $B$-set l'insieme di questi boundary points.
 
 \subsection{Eliminazione dei quantificatori}
 Quest'ultimo passaggio \`e semplicemente l'applicazione della seguente
-equivalenza:
+equivalenza\autocite{cooper}:
 
 $$ \exists \, x \, . \, \varphi'[x] \longleftrightarrow \bigvee_{j=1}^m \Big(
 \varphi'_{- \infty}[j] \lor \bigvee_{b \in B}(\varphi'[b+j]) \Big)$$
@@ -168,24 +170,11 @@ formula priva del quantificatore esistenziale e si ha dunque ottenuto ci\`o che
 si voleva.
 
 \section{Implementazione}
-Il software \`e stato scritto nel linguaggio C rispettando lo standard C99, in
-questo capitolo verrà effettuata una discussione riguardo l'implementazione.
+Il software \`e stato scritto nel linguaggio C rispettando lo standard
+C99\autocite{c99}, in questo capitolo verrà effettuata una discussione riguardo
+l'implementazione.
 
 \subsection{Struttura e design}
-L'algoritmo \`e stato suddiviso in svariate procedure, implementate come singole
-funzioni in C, è possibile eseguire l'intero algoritmo chiamando la funzione
-\inline{char* cooper(char* wff, char* var)}, dove \inline{wff} è una formula ben
-formata (well-formed formula) nel linguaggio SMT-LIB e \inline{var} è la
-variabile da eliminare.
-Naturalmente la funzione restituisce la formula equivalente priva della
-variabile.
-Si rimanda a più tardi la discussione della forma esatta che deve avere la
-formula in ingresso.
-
-La funzione \inline{cooper} effettua quindi a sua volta delle chiamate a varie
-funzioni, si è cercato per quanto possibile di mantenere la suddivisione di
-queste sotto-procedure fedele alla descrizione dell'algoritmo svolta
-precedentemente.
 
 \begin{center}
 \begin{tikzpicture}[node distance=2cm]
@@ -205,6 +194,22 @@ precedentemente.
   \draw [arrow] (newFormula) -- (output);
 \end{tikzpicture}
 \end{center}
+
+L'algoritmo \`e stato suddiviso in svariate procedure, implementate come singole
+funzioni in C, è possibile eseguire l'intero algoritmo chiamando la funzione
+\inline{char* cooper(char* wff, char* var)}, dove \inline{wff} è una formula ben
+formata (well-formed formula) nel linguaggio SMT-LIB\autocite{smtlib} e
+\inline{var} è la variabile da eliminare.
+Naturalmente la funzione restituisce la formula equivalente priva della
+variabile.
+Si rimanda a più tardi la discussione della forma esatta che deve avere la
+formula in ingresso.
+
+La funzione \inline{cooper} effettua quindi a sua volta delle chiamate a varie
+funzioni, si è cercato per quanto possibile di mantenere la suddivisione di
+queste sotto-procedure fedele alla descrizione dell'algoritmo svolta
+precedentemente.
+
 
 Prima di spiegare il comportamento delle singole funzioni occorre accennare che
 l'oggetto principale manipolato dal programma è l'albero sintattico stesso della
@@ -334,9 +339,48 @@ considerare l'implementazione effettiva dell'algoritmo.
 
 Ovvero rimangono da discutere le funzioni \inline{normalize}, \inline{minInf} e
 \inline{newFormula}. Si adempia subito all'incombenza data dalla funzione
-\inline{simplify}, che ricordiamo fare parte di un passo opzionale.
+\inline{simplify}, di cui si ricorda fare parte di un passo opzionale.
 
 \src{442}{480}
+
+Tale funzione effettua una visita in ampiezza dell'albero alla ricerca di nodi
+\inline{or} o \inline{and} ed effettuando una sostituzione di questi ultimi,
+rispettivamente con \inline{true} e \inline{false} nel caso almeno uno degli
+operandi di \inline{or} sia \inline{true} o uno degli operandi di \inline{and}
+sia \inline{false}. La visita in ampiezza viene troncata nel caso si verifichi
+uno di questi casi, in quanto il valore dell'espressione è già determinabile,
+risulta chiaro da questo il perchè della visita in ampiezza e non in profondità.
+Si faccia notare come questa funzione di semplificazione possa essere
+notevolmente migliorata aggiungendo la valutazione delle espressioni, tuttavia
+questa non banale aggiunta esula dallo scopo del progetto.
+In sostanza questa funzione fornisce un buon compromesso tra i benefici che
+porta il poter accorciare le espressioni generate dall'algoritmo e una ulteriore
+complessità aggiunta. Si noti infine come ancora una volta occorre prestare
+attenzione alla corretta deallocazione della memoria.
+
+\`E giunto infine il momento di analizzare la funzione \inline{normalize}, tale
+funzione si appoggia a sua volta alle funzione \inline{getLCM} che a sua volta
+richiama \inline{gcd} e \inline{lcm}.
+
+\src{6}{13} %gcd e lcm
+
+Come è facile immaginare tali funzioni effettuano semplicemente il calcolo del
+massimo comun divisore e del minimo comune multiplo. Il primo viene svolto
+efficacemente dall'algoritmo di Euclide\autocite{euclid} mentre il secondo
+è dato banalmente dalla seguente.
+
+$$lcm(a, b) = \frac{a b}{GCD(a, b)}$$
+
+La funzione \inline{getLCM} prende in ingresso l'albero sintattico e una
+variabile e restituisce il minimo comune multiplo di tutti i coefficienti di
+tale variabile presenti nella formula.
+
+\src{107}{121} %getLCM
+
+La funzione 
+
+
+
 
 \section{Utilizzo}
 In questo capitolo verranno forniti alcuni semplici esempi di utilizzo.
@@ -346,21 +390,12 @@ In questo capitolo verranno forniti alcuni semplici esempi di utilizzo.
 \subsection{Esempi pratici}
 
 
+
 \newpage
 \tableofcontents
 
+\printbibliography
 
-\begin{thebibliography}{9}
-
-\bibitem{lamport94}
-  Leslie Lamport,
-  \textit{\LaTeX: a document preparation system},
-  Addison Wesley, Massachusetts,
-  2nd edition,
-  1994.
-
-
-\end{thebibliography}
 
 \end{document}
 
