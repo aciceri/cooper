@@ -523,13 +523,13 @@ char* cooper(char* wff, char* var) {
   char* str;
 
   tree = parse(wff); //Genera l'albero sintattico a partire dalla stringa
-  normalize(tree, var); //Trasforma tree in $\varphi_{- \infty}$
-  minf = minInf(tree, var);
-  f = newFormula(tree, minf, var);
+  normalize(tree, var); //Trasforma l'albero di tree
+  minf = minInf(tree, var); //Restituisce l'albero di $\varphi_{- \infty}$
+  f = newFormula(tree, minf, var); //Restituisce la formula equivalente
   simplify(f); //opzionale
-  str = treeToStr(f);
+  str = treeToStr(f); //Genera la stringa a partire dall'albero
 
-  recFree(tree);
+  recFree(tree); //Libera la memoria
   recFree(minf);
   recFree(f);
 

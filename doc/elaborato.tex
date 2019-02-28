@@ -11,8 +11,10 @@
 
 
 \usetikzlibrary{shapes.geometric, arrows}
-\tikzstyle{io} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=black]
-\tikzstyle{procedure} = [rectangle, minimum width=3cm, minimum height=1cm,text centered, draw=black]
+\tikzstyle{io} = [rectangle, rounded corners, minimum width=3cm, minimum
+height=1cm,text centered, draw=black]
+\tikzstyle{procedure} = [rectangle, minimum width=3cm, minimum height=1cm,text
+centered, draw=black]
 \tikzstyle{arrow} = [thick,->,>=stealth]
 
 \begin{document}
@@ -239,8 +241,102 @@ cosa si intende.
 Quella che viene presentata qui è un'analisi dettagliata del codice sorgente del
 programma riga per riga.
 
-\src{521}{600}
+\src{521}{600} %main()
 
+Alla luce di quanto detto precedentemente il funzionamento di \inline{cooper()}
+risulta autoesplicativo. \'E quindi arrivato il momento di esporre la segnatura
+completa del tipo composto \inline{t_syntaxTree}.
+
+\src{16}{20} %segnatura di t_syntaxTree
+
+Trattasi di un record definito ricorsivivamente avente $3$ campi:
+
+\begin{itemize}
+  \item \inline{char nodeName[16]} è una stringa di lunghezza fissata posta
+    arbritrariamente a 16 caratteri, è il nome del nodo nell'albero sintattico.
+  \item \inline{int nodesLen} è il numero di figli del nodo in questione
+  \item \inline{t_syntaxTree** nodes} è un array di puntatori ad altri nodi
+\end{itemize}
+
+Si consideri la formula in pseudolinguaggio
+$((2 = x) \; \land \; (3y + 4 + 5= 0)) \; \lor \; (x \equiv_{6} 0)$, in
+linguaggio SMT-LIB essa corrisponde a \inline{(and (or (= 2 x) (= (+ (* 3 y) 4
+  5) 0)) (div x 6))} e la sua rappresentazione tramite il tipo composto appena
+definito è chiarificata dal segente diagramma.
+
+\begin{center}
+  \begin{tikzpicture}[grow=right,
+    level 1/.style={sibling distance=12em},
+    level 2/.style={sibling distance=9em},
+    level 3/.style={sibling distance=5em},
+    every node/.style = {rectangle, rounded corners, minimum width=1cm, minimum height=0.5cm,text
+centered, draw=black}]]
+    \node {and}
+    child { node {or}
+      child {node {=}
+        child {node {2}}
+        child {node {x}}}
+      child {node {=}
+        child {node {+}
+          child {node {*}
+            child {node {3}}
+            child {node {y}}}
+          child {node {4}}
+          child {node {5}}}
+        child {node {0}}}}
+    child { node {div}
+      child {node {x}}
+      child {node {6}}};
+  \end{tikzpicture}
+\end{center}
+
+Le foglie dell'albero sono semplicemente nodi con l'attributo \inline{nodesLen}
+valente $0$, in tal caso è irrilevante il contenuto del campo \inline{nodes}. Si
+approfitta di questo momento per sottolineare l'importanza di una opportuna
+funzione di deallocazione di questa struttura.
+
+\src{204}{211} %recFree
+
+La natura ricorsiva del tipo \inline{t_syntaxTree} rende notevolmente semplice
+la scrittura di una funzione ricorsiva per la liberazione della memoria, come è
+semplice intuire tale funzione effettua una visita in profondità dell'albero
+deallocando nodo per nodo.
+
+Si passi ora a considerare due funzioni speculari, la funzione
+\inline{t_syntaxTree* parse(char* wff)} che trasforma una stringa nel
+corrispettivo albero sintattico e la funzione \inline{char*
+  treeToStr(t_syntaxTree* tree)} che realizza l'esatto opposto.
+
+\src{23}{104} %parse
+
+La funzione \inline{parse} si appoggia alla funzione \inline{buildTree}, è in
+quest'ultima la funzione, ancora una volta ricorsiva, dove avviene la vera e
+propria costruzione dell'albero. Essa prende in ingresso i token che compongono
+la stringa in ingresso e restituisce l'albero, la parte di suddivisione in token
+viene effettuata (insieme ad altre questioni di gestione della memoria) da
+\inline{parse}. Tali funzioni prevedono che la stringa in ingresso rispetti
+esattamente la sintassi stabilita, e che inoltre, a causa della scelta arbitraria
+di porre $16$ caratteri come lunghezza del campo \inline{nodeName} non siano
+presenti token più lunghi.
+
+\src{483}{518} %treeToStr
+
+Si consideri ora la funzione speculare \inline{treeToStr}, anch'essa si
+appoggia a sua volta ad un'altra funzione, ovvero \inline{recTreeToStr}, è in
+quest'ultima che avviene la trasformazione da albero in stringa, rendendo quindi
+\inline{treeToStr} funge solamente da una funzione helper.
+
+Si ritorni ora a considerare i passi principali dell'algoritmo, così come sono
+esposti nella funzione \inline{cooper}, dopo quanto detto finora rimane da
+considerare l'implementazione effettiva dell'algoritmo.
+
+\src{525}{530} %passi fondamentali di cooper
+
+Ovvero rimangono da discutere le funzioni \inline{normalize}, \inline{minInf} e
+\inline{newFormula}. Si adempia subito all'incombenza data dalla funzione
+\inline{simplify}, che ricordiamo fare parte di un passo opzionale.
+
+\src{442}{480}
 
 \section{Utilizzo}
 In questo capitolo verranno forniti alcuni semplici esempi di utilizzo.
