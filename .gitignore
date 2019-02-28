@@ -12,3 +12,7 @@ doc/auto/*
 _minted*
 *.ys
 *.toc
+*.bbl
+*.blg
+*.xml
+*.lof
