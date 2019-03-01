@@ -313,7 +313,7 @@ t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) {
   str[0] = '\0';
   t_syntaxTree* bPoints = malloc(sizeof(t_syntaxTree));
   bPoints->nodes = NULL;
-  strcpy(bPoints->nodeName, "bPoints"); //useful only for debugging purposes
+  strcpy(bPoints->nodeName, "bPoints"); //solo per debugging
   bPoints->nodesLen = 0;
 
   for(int i=0; i<tree->nodesLen; i++) {

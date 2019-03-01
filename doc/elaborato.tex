@@ -56,7 +56,7 @@ nell'espansione $\mathcal{A}_{\mathbb{Z}}^\star$ ottenuta da
 $\mathcal{A}_{\mathbb{Z}}$.
 
 Nel \date{1930} Moj\.zesz Presburger ha esibito un algoritmo di eliminazione dei
-quantificatori per $T_{\mathbb{Z}}^*$ e nel \date{1972} Cooper ha fornito una
+quantificatori\autocite{presburger} per $T_{\mathbb{Z}}^*$ e nel \date{1972} Cooper ha fornito una
 versione migliorata basata sull'eliminazione dei quantificatori da formule nella
 forma $\exists \,x \,.\, \varphi$, dove $\varphi$ \`e una formula senza
 quantificatori arbitraria.
@@ -228,12 +228,12 @@ da eliminare sono diventati $1$. La segnatura di tale funzione è \inline{void
 
 Le funzioni \inline{t_syntaxTree* minInf(t_syntaxTree* tree, char* var)} e \newline
 \inline{t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var)}, come è
-facile evincere, generano rispettivamente $\varphi_{- \infty}$ e l'insieme dei
+facile evincere, generano rispettivamente $\varphi' _{- \infty}$ e l'insieme dei
 boundary points.
 
 Infine \inline{t_syntaxTree* newFormula(t_syntaxTree* tree,
   t_syntaxTree* minf, char* var)} genera la formula equivalente a partire da
-$\varphi_{- \infty}$ e della formula normalizzata. \`E al suo interno che viene
+$\varphi '_{- \infty}$ e della formula normalizzata. \`E al suo interno che viene
 effettuata la chiamata a \inline{boundaryPoints();}.
 
 Esiste inoltre un ulteriore passo opzionale non facente parte dell'algoritmo di
@@ -413,7 +413,7 @@ di essere manipolata dal programma; il nodo principale deve essere un
 obbligatoriamente \inline{=}, \inline{>} o \inline{div}.
 Sia \inline{=}, \inline{>} che \inline{div} devono avere esattamente $2$ figli,
 il primo (cioè \inline{.nodes[0]}) deve essere un polinomio lineare mentre il
-secondo (cioè inline{.nodes[1]}) deve essere una costante. Il polinomio lineare
+secondo (cioè \inline{.nodes[1]}) deve essere una costante. Il polinomio lineare
 deve sempre essere della forma \inline{(+ (* c1 x1) (* c2 x2) ... (* c3
   x3))}, dove come prima, il primo figlio di \inline{*} è una costante e il
 secondo è una variabile. La sintassi è questa anche nel caso una delle
@@ -427,7 +427,7 @@ $$ \exists \; x \; . \; (2x + y = 3) \land (z < y) \land (x \equiv_{2} 0) $$
 
 Tale formula trasformata in albero risulta equivalente alla seguente, si osservi
 come sono stati esplicitati anche i coefficienti $\pm 1$ e come non siano
-presenti costanti tra i figli di \inline{+}.
+presenti costanti tra i figli del nodo \inline{+}.
 
 \begin{minted}{c}
   (and (= (+ (* 2 x) (* 3 y)) 3)
@@ -435,6 +435,74 @@ presenti costanti tra i figli di \inline{+}.
        (div (+ (* 1 x)) 2))
 \end{minted}
 
+Ed ecco il listato relativo alla funzione \inline{normalize} nella
+sua interezza, si osservi come esso prenda in ingresso l'albero sintattico della
+formula e la variabile da eliminare ma ritorni effettivamente \inline{void},
+ovvero si osservi come modifichi l'albero senza costruirne uno nuovo. Si faccia
+anche caso a come tale funzione sia fortemente vincolata alla rigida struttura
+sintattica che è stata supposta. Tale funzione oltre a normalizzare la formula
+(tutti i coefficienti della variabile da eliminare diventano $1$) agginuge anche
+un opportuno predicato di divisibilità come specificato nell'algoritmo.
+
+\src{124}{201} %normalize
+
+La funzione \inline{minInf}, come suggerisce il nome, riceve in ingresso la
+formula normalizzta $\varphi'$ e restituisce $\varphi'_{- \infty}$. A differenza
+della funzione precedente essa restituisce effettivamente il nuovo albero.
+
+\src{233}{272} %minInf
+
+Prima di passare alla discussione della funzione \inline{newFormula}, che
+effetivamente restituisce la formula equivalente senza variabile, è bene
+discutere di alcune altre funzioni a cui essa si appoggia, cioè \inline{calcm} e
+\inline{boundaryPoints}.
+La funzione \inline{int calcm(t_syntaxTree* tree, char* var)} prende in ingresso
+l'albero della formula $\varphi'$ e la variabile da eliminare e restituisce il
+minimo comune multiplo di tutti i coefficienti della $x$ che appaiono nella
+formula, cioè calcola $m$ dell'equivalenza di cui si è giò discusso.
+
+$$ \exists \, x \, . \, \varphi'[x] \longleftrightarrow \bigvee_{j=1}^m \Big(
+\varphi'_{- \infty}[j] \lor \bigvee_{b \in B}(\varphi'[b+j]) \Big)$$
+
+\src{287}{308} %calcm
+
+La funzione \inline{t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var)}
+riceve ancora in ingresso l'albero sintattico della formula $\varphi'_{- \infty}$
+e restituisce il $B$-set $B$ della formula. Per semplicità di rappresentazione
+si è scelto di usare ancora come tipo per l'output sempre
+\inline{t_syntaxTree}, dove però l'albero avrà come \inline{.nodeName} la
+stringa arbitraria \inline{"bPoints"}, tale scelta non ha nessun impatto e
+facilita semplicemente il debugging.
+  
+\src{311}{394} %boundaryPoints
+
+Si discuta ora la funzione che restituisce la formula equivalente che poi
+\inline{cooper} ritorna, tale funzione è \inline{t_syntaxTree*
+  newFormula(t_syntaxTree* tree, t_syntaxTree* minf, char* var)}, essa non è
+altro che l'applicazione dell'equivalenza già esposta più volte. Prende in
+ingresso le forumule $\varphi'$ e $\varphi'_{-\infty}$ e la variabile da
+eliminare, è al suo interno che vengono effettuate le chiamate a
+\inline{boundaryPoints} e \inline{calcm}.
+
+\src{397}{439} %newFormula
+
+La funzione \inline{newFormula} non fa altro che invocare \inline{calcm} e
+\inline{boundaryPoints} e generare l'albero della nuova formula equivalente,
+albero che poi ritorna. Eliminate le varie questioni di gestione della memoria
+quello che rimane è semplicemente un ciclo \inline{for}. La funzione in realtà
+fa anche uso di un'ulteriore funzione di valutazione, ovvero una funzione che
+prende ingresso un albero, una variabile e un valore e va a sostituire il valore
+alla variabile.
+
+Trattasi ovviamente della funzione \inline{void eval(t_syntaxTree* tree, char*
+  var, t_syntaxTree* val)}, si osservi anche qui come ovviamente tale funzione
+potrebbe essere resa più sofisticata aggiungendo una effettiva valutazione delle
+operazioni aritmetiche o logiche, ma come prima anche questo avrebbe aggiunto
+una ulteriore complessità al progetto, pertanto si è scelto di non proseguire in
+questa strada.
+
+
+\src{275}{284}
 
 \section{Utilizzo}
 In questo capitolo verranno forniti alcuni semplici esempi di utilizzo.
