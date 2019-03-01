@@ -36,7 +36,7 @@ centered, draw=black]
   universali da formule dell'aritmetica di Presburger. In questo documento
   verr\`a descritto l'algoritmo e verr\`a discussa una semplice implementazione
   in C di una versione ridotta dell'algoritmo atta ad interfacciarsi al
-  software di model checking MCMT.  
+  software di model checking MCMT\autocite{mcmt}.  
 \end{abstract}
 
 \section{Aritmetica di Presburger}
@@ -62,7 +62,7 @@ forma $\exists \,x \,.\, \varphi$, dove $\varphi$ \`e una formula senza
 quantificatori arbitraria.
 
 
-\section{L'algoritmo}
+\section{L'algoritmo di Cooper}
 Si ha quindi che l'algoritmo ha come ingresso una formula del tipo $\exists
 \,x \,.\, \varphi$ e come uscita una una formula equivalente senza il
 quantificatore esistenziale. Se si vogliono eliminare pi\`u quantificatori
@@ -377,9 +377,63 @@ tale variabile presenti nella formula.
 
 \src{107}{121} %getLCM
 
-La funzione 
+\inline{getLCM} visita ogni nodo dell'albero alla ricerca dei coefficienti della
+variabile \inline{var}, ovvero cerca nodi della forma \inline{(* c var)} dove
+appunto \inline{var} è la variabile da eliminare mentre \inline{c} è il
+coefficiente. \'E importante sottolineare come i nodi debbano avere il
+coefficiente in \inline{.nodes[0]} e la variabile in \inline{.nodes[1]}, cioè
+nodi della forma \inline{(* var c)} non vengono correttatamente gestiti.
+Tale compromesso porta sicuramente ad una perdita di generalità che in questo
+caso particolare potrebbe anche essere evitata, ma lo stesso non si potrà dire
+in seguito, pertanto verrà assunto un tale input.
 
+Risulta quindi ora utile discutere quale sia la forma esatta dell'input gestito
+dal programma, molte assunzioni che portano a perdita di generalità sono state
+fatte, la maggior parte delle quali non evitabili a meno di dover scrivere molte
+funzioni ausiliarie di semplificazione. Si è scelta tale strada principalmente
+per due motivi:
 
+\begin{itemize}
+  \item Già allo stato attuale il programma ha presentato molte difficoltà di
+    natura tecnica non inerenti all'implementazione dell'algoritmo. Considerare
+    una gamma più ampia di input avrebbe aggiunto una notevole complessità
+    derivante dall'utilizzo del C senza nessuna libreria di supporto.
+  \item L'obiettivo finale di questo progetto è quello di aggiungere una
+    funzionalità al software MCMT\autocite{mcmt}, scrivere una libreria di
+    supporto per poter gestire più input avrebbe comportato la riscrittura di
+    molto codice già presente in MCMT. Allo stesso tempo interfacciarsi al
+    software preesistente avrebbe reso vincolato troppo il progetto, si è
+    preferito un approccio intermedio in modo da poter comunque rendere questo
+    software il più stand-alone possibile.
+\end{itemize}
+
+Si passi dunque ad esaminare la forma di albero più generale possibile in grado
+di essere manipolata dal programma; il nodo principale deve essere un
+\inline{and} con almeno $1$ figlio, tutti i figli di questo nodo devono essere
+obbligatoriamente \inline{=}, \inline{>} o \inline{div}.
+Sia \inline{=}, \inline{>} che \inline{div} devono avere esattamente $2$ figli,
+il primo (cioè \inline{.nodes[0]}) deve essere un polinomio lineare mentre il
+secondo (cioè inline{.nodes[1]}) deve essere una costante. Il polinomio lineare
+deve sempre essere della forma \inline{(+ (* c1 x1) (* c2 x2) ... (* c3
+  x3))}, dove come prima, il primo figlio di \inline{*} è una costante e il
+secondo è una variabile. La sintassi è questa anche nel caso una delle
+costanti sia uguale a $1$.
+
+Non è difficile convincersi che ogni albero può essere trasformato, con mere
+manipolazioni simboliche, in un albero di questa forma. Per rendere più chiaro
+quanto detto si consideri ad esempio la seguente formula:
+
+$$ \exists \; x \; . \; (2x + y = 3) \land (z < y) \land (x \equiv_{2} 0) $$
+
+Tale formula trasformata in albero risulta equivalente alla seguente, si osservi
+come sono stati esplicitati anche i coefficienti $\pm 1$ e come non siano
+presenti costanti tra i figli di \inline{+}.
+
+\begin{minted}{c}
+  (and (= (+ (* 2 x) (* 3 y)) 3)
+       (> (+ (* 1 y) (* -1 z)) 0)
+       (div (+ (* 1 x)) 2))
+\end{minted}
 
 
 \section{Utilizzo}

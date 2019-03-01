@@ -1,8 +1,8 @@
 PARAMS = -std=c99 -Wall -g
 leak-check = yes
 track-origins = yes
-#wff = "(and (= (+ (* -2 x) (* 2 a) (* 3 b) (* 3 c)) 3) (> (+ (* 5 x) (* 3 c)) 1) (div (+ (* 2 x) (* 2 y)) 1))"
-wff = "(and (= (+ (* 2 x) (* 1 y)) 4))"
+wff = "(and (= (+ (* -2 x) (* 2 a) (* 3 b) (* 3 c)) 3) (> (+ (* 5 x) (* 3 c)) 1) (div (+ (* 2 x) (* 2 y)) 1))"
+#wff = "(and (= (+ (* 2 x) (* 1 y)) 4))"
 vars = "x y a b c" #variables
 var = "x" #to eliminate
 
