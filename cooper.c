@@ -526,7 +526,7 @@ char* cooper(char* wff, char* var) {
   normalize(tree, var); //Trasforma l'albero di tree
   minf = minInf(tree, var); //Restituisce l'albero di $\varphi_{- \infty}$
   f = newFormula(tree, minf, var); //Restituisce la formula equivalente
-  simplify(f); //opzionale
+  //simplify(f); //opzionale
   str = treeToStr(f); //Genera la stringa a partire dall'albero
 
   recFree(tree); //Libera la memoria
