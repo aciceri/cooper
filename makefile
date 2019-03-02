@@ -1,7 +1,9 @@
 
+SHELL := /bin/bash
 PARAMS = -std=c99 -Wall -g #compila nello standard C99 e abilita tutti i warning
 leak-check = yes #valgrind effettua una ricerca dei leak più accurata
 track-origins = yes #valgrind fornisce più informazioni
+#wff = "(and (= (+ (* 2 x) (* 3 y)) 1))"
 wff = "(and (= (+ (* -2 x) (* 2 a) (* 3 b) (* 3 c)) 3) \
 	    (> (+ (* 5 x) (* 3 c)) 1) \
             (div (+ (* 2 x) (* 2 y)) 1))" #formula in ingresso
@@ -15,7 +17,8 @@ cooper.o: cooper.c cooper.h
 	gcc $(PARAMS) -c cooper.c -o cooper.o
 
 run: test #esegue test e restituisce il tempo impiegato
-	time ./test $(wff) $(var)
+	@echo -e 'Elimino la variabile $(var) dalla seguente formula:\n$(wff) ---> \n'
+	@time ./test $(wff) $(var)
 
 sat: test sat.py #verifica la soddisfacibilità della formula generata grazie a yices
 	./sat.py $(wff) $(vars)

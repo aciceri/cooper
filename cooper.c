@@ -501,8 +501,8 @@ int recTreeToStr(t_syntaxTree* t, char** str, int len) {
       nLen = recTreeToStr(t->nodes[i], str, nLen);
     }
 
-    nLen++;
-    *str = realloc(*str, sizeof(char) * nLen);
+    nLen++; //nLen++;
+    *str = realloc(*str, sizeof(char) * nLen); 
     strcat(*str, ")");
 
     return nLen;
@@ -528,7 +528,7 @@ char* cooper(char* wff, char* var) {
   f = newFormula(tree, minf, var); //Restituisce la formula equivalente
   //simplify(f); //opzionale
   str = treeToStr(f); //Genera la stringa a partire dall'albero
-
+  
   recFree(tree); //Libera la memoria
   recFree(minf);
   recFree(f);
