@@ -1,6 +1,6 @@
 # Algoritmo di Cooper implementato in C
 
-[![asciicast](https://asciinema.org/a/g43857JHmxfwaWErEJYEMMrjp.svg)](https://asciinema.org/a/g43857JHmxfwaWErEJYEMMrjp)
+[![asciicast](https://asciinema.org/a/g43857JHmxfwaWErEJYEMMrjp.svg)](https://asciinema.org/a/g43857JHmxfwaWErEJYEMMrjp?autoplay=1)
 
 ## Introduzione
 Questo repository contiene la mia implementazione di una versione ridotta
