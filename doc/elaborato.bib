@@ -30,11 +30,36 @@ MRREVIEWER = {B. Artmann},
   year = 1999
 }
 
-@MISC{smtlib,
-  author =	 {Clark Barrett and Pascal Fontaine and Cesare Tinelli},
-  title =	 {{The Satisfiability Modulo Theories Library (SMT-LIB)}},
-  howpublished = {{\tt www.SMT-LIB.org}},
-  year =	 2016,
+@software{python,
+  author = {{Python Software Foundation}},
+  title = {Python language},
+  url = {https://www.python.org/},
+  version = {3.7.2},
+  date = {2019},
+}
+
+@software{guile,
+  author = {{GNU}},
+  title = {GNU Ubiquitous Intelligent Language for Extensions (GUILE)}},
+  url = {https://www.gnu.org/software/guile/},
+  version = {2.2.4},
+  date = {2018},
+}
+
+@software{smtlib,
+  author = {{Clark Barrett and Pascal Fontaine and Cesare Tinelli}},
+  title = {SMT-LIB},
+  url = {http://smtlib.cs.uiowa.edu/papers/smt-lib-reference-v2.6-r2017-07-18.pdf},
+  version = {2.6},
+  date = {2017-06-18},
+}
+
+@software{yices,
+  author = {{SRI International}},
+  title = {Yices},
+  url = {http://yices.csl.sri.com/},
+  version = {1.0.40},
+  date = {2013-12-04},
 }
 
 @article{cooper,
@@ -59,6 +84,8 @@ MRREVIEWER = {B. Artmann},
   year =	 2018,
 }
 
+
+
 @article {presburger,
     AUTHOR = {Presburger, Moj\.{z}esz},
      TITLE = {On the completeness of a certain system of arithmetic of whole
@@ -77,4 +104,19 @@ MRREVIEWER = {B. Artmann},
 MRREVIEWER = {John W. Dawson, Jr.},
        DOI = {10.1080/014453409108837187},
        URL = {https://doi-org.pros.lib.unimi.it:2050/10.1080/014453409108837187},
+}
+
+@InProceedings{complexity,
+author="Fischer, Michael J.
+and Rabin, Michael O.",
+editor="Caviness, Bob F.
+and Johnson, Jeremy R.",
+title="Super-Exponential Complexity of Presburger Arithmetic",
+booktitle="Quantifier Elimination and Cylindrical Algebraic Decomposition",
+year="1998",
+publisher="Springer Vienna",
+address="Vienna",
+pages="122--135",
+abstract="Lower bounds are established on the computational complexity of the decision problem and on the inherent lengths of proofs for two classical decidable theories of logic: the first-order theory of the real numbers under addition, and Presburger arithmetic --- the first-order theory of addition on the natural numbers. There is a fixed constant c > 0 such that for every (nondeterministic) decision procedure for determining the truth of sentences of real addition and for all sufficiently large n, there is a sentence of length n for which the decision procedure runs for more than 2cnsteps. In the case of Presburger arithmetic, the corresponding bound is {\$}{\$}{\{}2^{\{}{\{}2^{\{}cn{\}}{\}}{\}}{\}}{\$}{\$}. These bounds apply also to the minimal lengths of proofs for any complete axiomatization in which the axioms are easily recognized.",
+isbn="978-3-7091-9459-1"
 }
