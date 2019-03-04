@@ -37,8 +37,8 @@ equivalente non contiene più variabili
 
 
 ## Documentazione
-L'elaborato che si trova all'interno di `/doc/` contiene una breve introduzione
-teorica, la discussione dell'implementazione e alcune informazioni sull'utilizzo
-(tra cui esempi).
+L'[elaborato](doc/elaborato.pdf) che si trova all'interno di `/doc/`
+contiene una breve introduzione teorica, la discussione
+dell'implementazione e alcune informazioni sull'utilizzo (tra cui esempi).
 
 
