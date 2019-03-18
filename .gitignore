@@ -1,5 +1,6 @@
 *.o
 test
+test2
 *.dvi
 *.log
 *.aux
