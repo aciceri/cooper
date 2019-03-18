@@ -34,7 +34,7 @@ centered, draw=black]
 \begin{abstract}
   L'algoritmo di Cooper permette di effettuare l'eliminazione dei quantificatori
   universali da formule dell'aritmetica di Presburger. In questo documento
-  verr\`a descritto l'algoritmo e verr\`a discussa una semplice implementazione
+  verrà descritto l'algoritmo e verrà discussa una semplice implementazione
   in C di una versione ridotta dell'algoritmo atta ad interfacciarsi al
   software di model checking MCMT\autocite{mcmt}.  
 \end{abstract}
@@ -49,7 +49,7 @@ tutte le $\Sigma_{\mathbb{Z}}$-formule vere in $\mathcal{A}_{\mathbb{Z}}$.
 Tale teoria non ammette l'eliminazione dei quantificatori.
 
 Consideriamo ora la segnatura estesa $\Sigma_{\mathbb{Z}}^*$ ottenuta aggiungendo
-a $\Sigma_{\mathbb{Z}}$ un'infinit\`a di predicati unari di divisibilt\`a $D_k$
+a $\Sigma_{\mathbb{Z}}$ un'infinità di predicati unari di divisibiltà $D_k$
 per ogni $k \ge 2$, dove $D_k(x)$ indica che $x \equiv_k 0$.
 Sia $T_{\mathbb{Z}}^*$ l'insieme delle $\Sigma_{\mathbb{Z}}$-formule vere
 nell'espansione $\mathcal{A}_{\mathbb{Z}}^*$ ottenuta da
@@ -58,7 +58,7 @@ $\mathcal{A}_{\mathbb{Z}}$.
 Nel \date{1930} Moj\.zesz Presburger ha esibito un algoritmo di eliminazione dei
 quantificatori\autocite{presburger} per $T_{\mathbb{Z}}^*$ e nel \date{1972} Cooper ha fornito una
 versione migliorata basata sull'eliminazione dei quantificatori da formule nella
-forma $\exists \,x \,.\, \varphi$, dove $\varphi$ \`e una formula senza
+forma $\exists \,x \,.\, \varphi$, dove $\varphi$ è una formula senza
 quantificatori arbitraria.
 
 
@@ -71,14 +71,14 @@ esistenziali basta reiterare l'algoritmo.
 Si osserva come ovviamente ogni formula contenente quantificatori universali
 possa essere trasformata in una formula equivalente con soli quantificatori
 esistenziali.
-Pertanto non si ha una perdita di generalit\'a ad assumere un input in tale
+Pertanto non si ha una perdita di generalità ad assumere un input in tale
 forma.
 
 \subsection{Processo di semplificazione}
 In questo passaggio vengono effettuate le seguenti semplificazioni alla formula
 in ingresso $\varphi$:
 \begin{itemize}
-\item Tutti i connettivi logici composti, cio\`e che non sono $\lnot$, $\land$ o
+\item Tutti i connettivi logici composti, cioè che non sono $\lnot$, $\land$ o
   $\lor$, vengono sostituiti nella loro definizione in termini di $\lnot$,
   $\land$ o $\lor$.
 \item I predicati binari $\ge$ e $\le$ vengono sostituiti con le loro
@@ -95,13 +95,13 @@ in forma normale negativa possiamo dunque assumere che $\varphi$ sia
 congiunzione e disgiunzione dei seguenti tipi di letterali:
 
 $$0=t \qquad \lnot(0=t) \qquad 0<t \qquad D_k(t) \qquad \lnot D_k(t)$$
-Diremo che $\varphi$ in tale forma \'e una \textbf{formula ristretta}.
+Diremo che $\varphi$ in tale forma è una \textbf{formula ristretta}.
 
 \subsection{Normalizzazione dei coefficienti}
 Assumiamo quindi che l'algoritmo riceva in ingresso $\exists \, x \, . \,
 \varphi$ con $\varphi$ formula ristretta. Il primo passaggio consiste nel
-trasformare $\varphi$ in una formula dove il coefficiente della $x$ \`e sempre
-lo stesso. Per fare questo \`e sufficiente calcolare il minimo comune multiplo
+trasformare $\varphi$ in una formula dove il coefficiente della $x$ è sempre
+lo stesso. Per fare questo è sufficiente calcolare il minimo comune multiplo
 $l$ di tutti i coefficienti di $x$ ed effettuare i seguenti passi:
 \begin{itemize}
   \item Per le equazioni e le equazioni negate, rispettivamente nella forma
@@ -118,8 +118,8 @@ Quindi ora tutti i coefficienti della $x$ in $\varphi$ sono $\pm l$, passiamo
 ora a considerare la seguente formula equivalente:
 
 $$ \exists \, x . \, (D_l(x) \land \psi)  $$
-dove $\psi$ \`e ottenuta da $\varphi$\ sostituendo $l \cdot x$ con $x$.
-Dunque la formula $\varphi' = D_l(x) \land \psi$ \`e una formula ristretta dove
+dove $\psi$ è ottenuta da $\varphi$\ sostituendo $l \cdot x$ con $x$.
+Dunque la formula $\varphi' = D_l(x) \land \psi$ è una formula ristretta dove
 i coefficienti della $x$ sono $\pm 1$.
 
 \subsection{Costruzione di $\varphi'_{- \infty}$}
@@ -138,7 +138,7 @@ $\varphi'$ e sostituendo tutte le formule atomiche $\alpha$ con $\alpha_{-
 \end{center}
 
 \subsection{Calcolo dei boundary points}
-Ad ogni letterale $L[x]$ di $\varphi '$ contenente la $x$ che non \`e un
+Ad ogni letterale $L[x]$ di $\varphi '$ contenente la $x$ che non è un
 predicato di divisibilit\`a associamo un intero, detto \textbf{boundary point},
 nel seguente modo:
 
@@ -151,22 +151,22 @@ nel seguente modo:
     $0 < -x + t$ &  niente
   \end{tabular}
 \end{center}
-Si osserva come nel caso la formula $\varphi$ contenga pi\`u variabili da eliminare
+Si osserva come nel caso la formula $\varphi$ contenga più variabili da eliminare
 allora i valori nella colonna di destra possano dipendere da altre variabili.
 Chiamiamo $B$-set l'insieme di questi boundary points.
 
 \subsection{Eliminazione dei quantificatori}
-Quest'ultimo passaggio \`e semplicemente l'applicazione della seguente
+Quest'ultimo passaggio è semplicemente l'applicazione della seguente
 equivalenza\autocite{cooper}:
 
 $$ \exists \, x \, . \, \varphi'[x] \longleftrightarrow \bigvee_{j=1}^m \Big(
 \varphi'_{- \infty}[j] \lor \bigvee_{b \in B}(\varphi'[b+j]) \Big)$$
-dove $\varphi'$ \`e la formula ristretta in cui i coefficienti della $x$ sono
-sempre $\pm 1$, $m$ \`e il minimo comune multiplo di tutti i $k$ dei predicati
+dove $\varphi'$ è la formula ristretta in cui i coefficienti della $x$ sono
+sempre $\pm 1$, $m$ è il minimo comune multiplo di tutti i $k$ dei predicati
 di divisbilit\`a $D_k(t)$ che appaiono in $\varphi'$ tali che appaia la $x$ in
 $t$ e infine $B$ \`e il $B$-set relativo a $\varphi'$.
 Considerando quindi il lato destro della precedente equivalenza si ha una
-formula priva del quantificatore esistenziale e si ha dunque ottenuto ci\`o che
+formula priva del quantificatore esistenziale e si ha dunque ottenuto ciò che
 si voleva.
 
 \subsection{Complessità computazionale}
@@ -337,7 +337,7 @@ esattamente la sintassi stabilita, e che inoltre, a causa della scelta arbitrari
 di porre $16$ caratteri come lunghezza del campo \inline{nodeName} non siano
 presenti token più lunghi.
 
-\subsubsection{Funzione \inline{treeToStr1}}
+\subsubsection{Funzione \inline{treeToStr}}
 \src{483}{518} %treeToStr
 
 Si consideri ora la funzione speculare \inline{treeToStr}, anch'essa si
