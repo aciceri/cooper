@@ -8,8 +8,11 @@ FLAGS = -shell-escape
 run: $(THESIS).pdf
 
 $(THESIS).pdf: $(THESIS).bbl $(THESIS).tex
+	make clean
 	pdflatex $(FLAGS) $(THESIS).tex -draftmode
-	pdflatex $(FLAGS) $(THESIS).tex 
+	pythontex $(THESIS)
+	pdflatex $(FLAGS) $(THESIS).tex
+	make clean
 
 $(THESIS).bbl: $(THESIS).aux
 	bibtex $(THESIS).aux
@@ -19,4 +22,4 @@ $(THESIS).aux: $(THESIS).bib
 	pdflatex $(FLAGS) $(THESIS).tex -draftmode
 
 clean:
-	rm -rf *.xml *.aux *.lof *.log *.lot *.toc *.bbl *.blg $(THESIS)-blx.bib
+	rm -rf *.xml *.aux *.lof *.log *.lot *.toc *.bbl *.blg $(THESIS)-blx.bib $(THESIS).pytxcode latex.py pythontex-files-elaborato

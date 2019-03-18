@@ -4,6 +4,7 @@
 
 #define ERROR(msg) {printf(msg); printf("\n"); exit(EXIT_FAILURE);}
 
+
 long int gcd(long int a, long int b) {
   return b == 0 ? a : gcd(b, a % b);
 }
@@ -96,13 +97,14 @@ must be a number constant");
 	ERROR("Expression error: '*' must have at least one child");
       if (tree->nodes[i]->nodes[0]->nodes[j]->nodesLen != 2)
 	ERROR("Expression error: '*' must have two children");
-      if (!isNumber(tree->nodes[i]->nodes[0]->nodes[j]->nodes[0]->nodeName) + isNumber(tree->nodes[i]->nodes[0]->nodes[j]->nodes[1]->nodeName))
+      if (!isNumber(tree->nodes[i]->nodes[0]->nodes[j]->nodes[0]->nodeName) +
+	  isNumber(tree->nodes[i]->nodes[0]->nodes[j]->nodes[1]->nodeName))
 	ERROR("Expression error: the first child of '*' must \
-be a number costant and the secondo must be a variable");
-      
+be a number costant and the second must be a variable");
     }
   }
 }
+
 
 t_syntaxTree* parse(char* wff) {
   char* wffSpaced = malloc(sizeof(char));

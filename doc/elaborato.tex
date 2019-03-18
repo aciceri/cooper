@@ -8,6 +8,7 @@
 \usepackage{amsfonts}
 \usepackage{amsthm}
 \usepackage{tikz}
+\usepackage{pythontex}
 \usepackage[backend=bibtex,style=verbose-trad2]{biblatex}
 
 \bibliography{elaborato} 
@@ -24,6 +25,31 @@ centered, draw=black]
 \newcommand{\src}[2]{\inputminted[linenos, mathescape=true, firstline={#1},
   lastline={#2}]{C}{../cooper.c}}
 \newcommand{\inline}[1]{\mintinline{C}{#1}}
+
+\begin{pythontexcustomcode}{py}
+def lines(f_name):
+    with open("../cooper.c", "r") as source_file:
+        lines = source_file.readlines()
+        found = False
+        for i, line in enumerate(lines):
+            if not found and f_name in line:
+                starting_line = i + 1
+                found = True
+                brackets = 0
+            if found:
+                brackets += line.count("{")
+                brackets -= line.count("}")
+                if brackets == 0:
+                    ending_line = i + 1
+                    break
+
+        if found:
+            return "\src{{{%d}}}{{{%d}}}" % (starting_line, ending_line)
+        else:
+            return "inline{%s}" % f_name      
+\end{pythontexcustomcode}
+
+\newcommand{\srcf}[1]{\pyc{print(lines("#1"))}}
 
 \title{%
   Algoritmo di eliminazione dei quantificatori di Cooper\\
@@ -60,7 +86,6 @@ quantificatori\autocite{presburger} per $T_{\mathbb{Z}}^*$ e nel \date{1972} Coo
 versione migliorata basata sull'eliminazione dei quantificatori da formule nella
 forma $\exists \,x \,.\, \varphi$, dove $\varphi$ è una formula senza
 quantificatori arbitraria.
-
 
 \section{L'algoritmo di Cooper}
 Si ha quindi che l'algoritmo ha in ingresso una formula del tipo $\exists
@@ -255,15 +280,15 @@ Quella che viene presentata qui è un'analisi dettagliata del codice sorgente de
 programma riga per riga, si è deciso di seguire il più possibile il flusso di
 esecuzione del programma, in modo da evidenziare i passi dell'algoritmo.
 
-\subsubsection{Funzione \inline{cooper}}
-\src{521}{600} %cooper()
+\subsubsection{Funzione \inline{cooperToStr}}
+\srcf{char* cooperToStr}
 
 Alla luce di quanto detto precedentemente il funzionamento di \inline{cooper}
 risulta autoesplicativo. \'E quindi arrivato il momento di esporre la segnatura
 completa del tipo composto \inline{t_syntaxTree}.
 
 \subsubsection{Segnatura di \inline{t_syntaxTree}}
-\src{16}{20} %segnatura di t_syntaxTree
+\srcf{typedef struct t_syntaxTree}
 
 Trattasi di un record definito ricorsivivamente avente $3$ campi:
 
@@ -312,7 +337,7 @@ approfitta di questo momento per sottolineare l'importanza di una opportuna
 funzione di deallocazione di questa struttura.
 
 \subsubsection{Funzione \inline{recFree}}
-\src{204}{211} %recFree
+\srcf{void recFree}
 
 La natura ricorsiva del tipo \inline{t_syntaxTree} rende notevolmente semplice
 la scrittura di una funzione ricorsiva per la liberazione della memoria, come è
@@ -325,7 +350,7 @@ corrispettivo albero sintattico e la funzione \inline{char*
   treeToStr(t_syntaxTree* tree)} che realizza l'esatto opposto.
 
 \subsubsection{Funzione \inline{parse}}
-\src{23}{104} %parse
+\srcf{t_syntaxTree* parse}
 
 La funzione \inline{parse} si appoggia alla funzione \inline{buildTree}, è in
 quest'ultima la funzione, ancora una volta ricorsiva, dove avviene la vera e
@@ -338,12 +363,14 @@ di porre $16$ caratteri come lunghezza del campo \inline{nodeName} non siano
 presenti token più lunghi.
 
 \subsubsection{Funzione \inline{treeToStr}}
-\src{483}{518} %treeToStr
+\srcf{char* treeToStr}
 
 Si consideri ora la funzione speculare \inline{treeToStr}, anch'essa si
 appoggia a sua volta ad un'altra funzione, ovvero \inline{recTreeToStr}, è in
 quest'ultima che avviene la trasformazione da albero in stringa, rendendo quindi
 \inline{treeToStr} funge solamente da una funzione helper.
+
+\srcf{int recTreeToStr}
 
 Si ritorni ora a considerare i passi principali dell'algoritmo, così come sono
 esposti nella funzione \inline{cooper}, dopo quanto detto finora rimane da
@@ -356,7 +383,7 @@ Ovvero rimangono da discutere le funzioni \inline{normalize}, \inline{minInf} e
 \inline{simplify}, di cui si ricorda fare parte di un passo opzionale.
 
 \subsubsection{Funzione \inline{simplify}}
-\src{442}{480}
+\srcf{void simplify}
 
 Tale funzione effettua una visita in ampiezza dell'albero alla ricerca di nodi
 \inline{or} o \inline{and} ed effettuando una sostituzione di questi ultimi,
@@ -378,7 +405,8 @@ funzione si appoggia a sua volta alle funzione \inline{getLCM} che a sua volta
 richiama \inline{gcd} e \inline{lcm}.
 
 \subsubsection{Funzioni \inline{gcd} e \inline{lcm}}
-\src{6}{13} %gcd e lcm
+\srcf{long int gcd}
+\srcf{long int lcm}
 
 Come è facile immaginare tali funzioni effettuano semplicemente il calcolo del
 massimo comun divisore e del minimo comune multiplo. Il primo viene svolto
@@ -392,7 +420,7 @@ variabile e restituisce il minimo comune multiplo di tutti i coefficienti di
 tale variabile presenti nella formula.
 
 \subsubsection{Funzione \inline{getLCM}}
-\src{107}{121} %getLCM
+\srcf{int getLCM}
 
 \inline{getLCM} visita ogni nodo dell'albero alla ricerca dei coefficienti della
 variabile \inline{var}, ovvero cerca nodi della forma \inline{(* c var)} dove
@@ -462,14 +490,14 @@ sintattica che è stata supposta. Tale funzione oltre a normalizzare la formula
 un opportuno predicato di divisibilità come specificato nell'algoritmo.
 
 \subsubsection{Funzione \inline{normalize}}
-\src{124}{201} %normalize
+\srcf{void normalize}
 
 La funzione \inline{minInf}, come suggerisce il nome, riceve in ingresso la
 formula normalizzta $\varphi'$ e restituisce $\varphi'_{- \infty}$. A differenza
 della funzione precedente essa restituisce effettivamente il nuovo albero.
 
 \subsubsection{Funzione \inline{minInf}}
-\src{233}{272} %minInf
+\srcf{t_syntaxTree* minInf}
 
 Prima di passare alla discussione della funzione \inline{newFormula}, che
 effetivamente restituisce la formula equivalente senza variabile, è bene
@@ -484,7 +512,7 @@ $$ \exists \, x \, . \, \varphi'[x] \longleftrightarrow \bigvee_{j=1}^m \Big(
 \varphi'_{- \infty}[j] \lor \bigvee_{b \in B}(\varphi'[b+j]) \Big)$$
 
 \subsubsection{Funzione \inline{calcm}}
-\src{287}{308} %calcm
+\srcf{int calcm}
 
 La funzione \inline{t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var)}
 riceve ancora in ingresso l'albero sintattico della formula $\varphi'_{- \infty}$
@@ -495,7 +523,7 @@ stringa arbitraria \inline{"bPoints"}, tale scelta non ha nessun impatto e
 facilita semplicemente il debugging.
 
 \subsubsection{Funzione \inline{boundaryPoints}}
-\src{311}{394} %boundaryPoints
+\srcf{t_syntaxTree* boundaryPoints} 
 
 Si discuta ora la funzione che restituisce la formula equivalente che poi
 \inline{cooper} ritorna, tale funzione è \inline{t_syntaxTree*
@@ -506,7 +534,7 @@ eliminare, è al suo interno che vengono effettuate le chiamate a
 \inline{boundaryPoints} e \inline{calcm}.
 
 \subsubsection{Funzione \inline{newFormula}}
-\src{397}{439} %newFormula
+\srcf{t_syntaxTree* newFormula}
 
 La funzione \inline{newFormula} non fa altro che invocare \inline{calcm} e
 \inline{boundaryPoints} e generare l'albero della nuova formula equivalente,
@@ -524,7 +552,7 @@ una ulteriore complessità al progetto, pertanto si è scelto di non proseguire 
 questa strada.
 
 \subsubsection{Funzione \inline{eval}}
-\src{275}{284}
+\srcf{void eval}
 
 \newpage
 \section{Utilizzo}
