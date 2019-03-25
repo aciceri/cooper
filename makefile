@@ -14,6 +14,9 @@ test: test.c cooper.o
 test2: test2.c cooper.o
 	gcc $(PARAMS) test2.c cooper.o -o test2
 
+test3: test3.c cooper.o
+	gcc $(PARAMS) test3.c cooper.o -o test3
+
 cooper.o: cooper.c cooper.h
 	gcc $(PARAMS) -c cooper.c -o cooper.o
 
@@ -23,6 +26,9 @@ run: test #esegue test e restituisce il tempo impiegato
 
 run2: test2
 	@time ./test2 $(wff) $(var)
+
+run3: test3
+	@time ./test3 $(wff) $(vars)
 
 sat: test sat.py #verifica la soddisfacibilità della formula generata grazie a yices
 	./sat.py $(wff) $(vars) $(var)

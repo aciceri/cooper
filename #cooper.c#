@@ -636,10 +636,14 @@ char** cooperToArray(char* wff, char* var, int* len) {
 
 char* test(char* wff, char** vars, int varlen) {
   int l;
+  char* str;
   char** fs = cooperToArray(wff, vars[0], &l);
 
   for(int i=0; i<l; i++) {
-    
+    /*
+      str = parse(fs[i]);
+      
+     */
   }
 
   return "";

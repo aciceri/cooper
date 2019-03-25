@@ -57,100 +57,94 @@ def lines(f_name):
 \author{Andrea Ciceri}
 \maketitle
 
-\begin{abstract}
-  L'algoritmo di Cooper permette di effettuare l'eliminazione dei quantificatori
-  universali da formule dell'aritmetica di Presburger. In questo documento
-  verrà descritto l'algoritmo e verrà discussa una semplice implementazione
-  in C di una versione ridotta dell'algoritmo atta ad interfacciarsi al
-  software di model checking MCMT\autocite{mcmt}.  
+\begin{abstract} L'algoritmo di Cooper permette di effettuare l'eliminazione dei
+quantificatori universali da formule dell'aritmetica di Presburger. In questo
+documento verrà descritto l'algoritmo e verrà discussa una semplice
+implementazione in C di una versione ridotta dell'algoritmo atta ad
+interfacciarsi al software di model checking MCMT\autocite{mcmt}.
 \end{abstract}
 
-\section{Aritmetica di Presburger}
-Sia $\mathbb{Z}$ l'anello degli interi, sia $\Sigma_{\mathbb{Z}}$ la segnatura
-$\{0, +, -, <\}$ e sia $\mathcal{A}_{\mathbb{Z}}$ il modello standard degli
-interi.
-Definiamo la teoria dell'\textbf{aritmetica di Presburger} come l'insieme
+\section{Aritmetica di Presburger} Sia $\mathbb{Z}$ l'anello degli interi, sia
+$\Sigma_{\mathbb{Z}}$ la segnatura $\{0, +, -, <\}$ e sia
+$\mathcal{A}_{\mathbb{Z}}$ il modello standard degli interi.  Definiamo la
+teoria dell'\textbf{aritmetica di Presburger} come l'insieme
 $T_{\mathbb{Z}}=Th(\mathcal{A}_{\mathbb{Z}})=Th(\mathbb{Z}, 0, 1, +, -, <)$ di
-tutte le $\Sigma_{\mathbb{Z}}$-formule vere in $\mathcal{A}_{\mathbb{Z}}$.
-Tale teoria non ammette l'eliminazione dei quantificatori.
+tutte le $\Sigma_{\mathbb{Z}}$-formule vere in $\mathcal{A}_{\mathbb{Z}}$.  Tale
+teoria non ammette l'eliminazione dei quantificatori.
 
-Consideriamo ora la segnatura estesa $\Sigma_{\mathbb{Z}}^*$ ottenuta aggiungendo
-a $\Sigma_{\mathbb{Z}}$ un'infinità di predicati unari di divisibiltà $D_k$
-per ogni $k \ge 2$, dove $D_k(x)$ indica che $x \equiv_k 0$.
+Consideriamo ora la segnatura estesa $\Sigma_{\mathbb{Z}}^*$ ottenuta
+aggiungendo a $\Sigma_{\mathbb{Z}}$ un'infinità di predicati unari di
+divisibiltà $D_k$ per ogni $k \ge 2$, dove $D_k(x)$ indica che $x \equiv_k 0$.
 Sia $T_{\mathbb{Z}}^*$ l'insieme delle $\Sigma_{\mathbb{Z}}$-formule vere
 nell'espansione $\mathcal{A}_{\mathbb{Z}}^*$ ottenuta da
 $\mathcal{A}_{\mathbb{Z}}$.
 
 Nel \date{1930} Moj\.zesz Presburger ha esibito un algoritmo di eliminazione dei
-quantificatori\autocite{presburger} per $T_{\mathbb{Z}}^*$ e nel \date{1972} Cooper ha fornito una
-versione migliorata basata sull'eliminazione dei quantificatori da formule nella
-forma $\exists \,x \,.\, \varphi$, dove $\varphi$ è una formula senza
-quantificatori arbitraria.
+quantificatori\autocite{presburger} per $T_{\mathbb{Z}}^*$ e nel \date{1972}
+Cooper ha fornito una versione migliorata basata sull'eliminazione dei
+quantificatori da formule nella forma $\exists \,x \,.\, \varphi$, dove
+$\varphi$ è una formula senza quantificatori arbitraria.
 
-\section{L'algoritmo di Cooper}
-Si ha quindi che l'algoritmo ha in ingresso una formula del tipo $\exists
-\,x \,.\, \varphi$ e in uscita una una formula equivalente senza il
-quantificatore esistenziale. Se si vogliono eliminare pi\`u quantificatori
-esistenziali basta reiterare l'algoritmo.
+\section{L'algoritmo di Cooper} Si ha quindi che l'algoritmo ha in ingresso una
+formula del tipo $\exists \,x \,.\, \varphi$ e in uscita una una formula
+equivalente senza il quantificatore esistenziale. Se si vogliono eliminare pi\`u
+quantificatori esistenziali basta reiterare l'algoritmo.
 
 Si osserva come ovviamente ogni formula contenente quantificatori universali
 possa essere trasformata in una formula equivalente con soli quantificatori
-esistenziali.
-Pertanto non si ha una perdita di generalità ad assumere un input in tale
-forma.
+esistenziali.  Pertanto non si ha una perdita di generalità ad assumere un input
+in tale forma.
 
-\subsection{Processo di semplificazione}
-In questo passaggio vengono effettuate le seguenti semplificazioni alla formula
-in ingresso $\varphi$:
+\subsection{Processo di semplificazione} In questo passaggio vengono effettuate
+le seguenti semplificazioni alla formula in ingresso $\varphi$:
 \begin{itemize}
 \item Tutti i connettivi logici composti, cioè che non sono $\lnot$, $\land$ o
-  $\lor$, vengono sostituiti nella loro definizione in termini di $\lnot$,
-  $\land$ o $\lor$.
+$\lor$, vengono sostituiti nella loro definizione in termini di $\lnot$, $\land$
+o $\lor$.
 \item I predicati binari $\ge$ e $\le$ vengono sostituiti con le loro
-  definizioni (e.g. $s \le t$ diventa $s < t + 1$). 
+definizioni (e.g. $s \le t$ diventa $s < t + 1$).
 \item Le diseguaglianze negate della forma $\lnot (s < t)$ vengono sostituite
-  con $t < s + 1$.
+con $t < s + 1$.
 \item Tutte le equazioni e le disequazioni vengono riscritte in modo da avere
-  $0$ nel lato sinistro ($s=t$ e $s<t$ diventano $0=t-s$ e $0<t-s$).
+$0$ nel lato sinistro ($s=t$ e $s<t$ diventano $0=t-s$ e $0<t-s$).
 \item Tutti gli argomenti dei predicati vengono sostituiti con la loro forma
-  canonica.
-\end{itemize}
-Dopo aver applicato queste sostituzioni e aver trasformato la $\varphi$ ottenuta
-in forma normale negativa possiamo dunque assumere che $\varphi$ sia
-congiunzione e disgiunzione dei seguenti tipi di letterali:
+canonica.
+\end{itemize} Dopo aver applicato queste sostituzioni e aver trasformato la
+$\varphi$ ottenuta in forma normale negativa possiamo dunque assumere che
+$\varphi$ sia congiunzione e disgiunzione dei seguenti tipi di letterali:
 
 $$0=t \qquad \lnot(0=t) \qquad 0<t \qquad D_k(t) \qquad \lnot D_k(t)$$
 Diremo che $\varphi$ in tale forma è una \textbf{formula ristretta}.
 
-\subsection{Normalizzazione dei coefficienti}
-Assumiamo quindi che l'algoritmo riceva in ingresso $\exists \, x \, . \,
-\varphi$ con $\varphi$ formula ristretta. Il primo passaggio consiste nel
-trasformare $\varphi$ in una formula dove il coefficiente della $x$ è sempre
-lo stesso. Per fare questo è sufficiente calcolare il minimo comune multiplo
-$l$ di tutti i coefficienti di $x$ ed effettuare i seguenti passi:
+\subsection{Normalizzazione dei coefficienti} Assumiamo quindi che l'algoritmo
+riceva in ingresso $\exists \, x \, . \, \varphi$ con $\varphi$ formula
+ristretta. Il primo passaggio consiste nel trasformare $\varphi$ in una formula
+dove il coefficiente della $x$ è sempre lo stesso. Per fare questo è sufficiente
+calcolare il minimo comune multiplo $l$ di tutti i coefficienti di $x$ ed
+effettuare i seguenti passi:
+
 \begin{itemize}
   \item Per le equazioni e le equazioni negate, rispettivamente nella forma
-    $0=t$ e $\lnot (0=t)$, si moltiplica $t$  per $l/c$, dove $c$ indica il
-    coefficiente della $x$.
+$0=t$ e $\lnot (0=t)$, si moltiplica $t$ per $l/c$, dove $c$ indica il
+coefficiente della $x$.
   \item Analogamente, per i predicati di divisibilit\`a $D_k(t)$ e i predicati
-    di divisibilt\`a negati $\lnot D_k(t)$ si moltiplica sia $t$ che $k$ per
-    $l/c$, sempre dove $c$ indica il coefficiente della $x$.
+di divisibilt\`a negati $\lnot D_k(t)$ si moltiplica sia $t$ che $k$ per $l/c$,
+sempre dove $c$ indica il coefficiente della $x$.
   \item Per le diseguaglianze $0<t$ si moltiplica $t$ per il valore assoluto
-    $l/c$, dove ancora un volta $c$ indica il coefficiente della $x$.
-  \end{itemize}
+$l/c$, dove ancora un volta $c$ indica il coefficiente della $x$.
+\end{itemize}
 
 Quindi ora tutti i coefficienti della $x$ in $\varphi$ sono $\pm l$, passiamo
 ora a considerare la seguente formula equivalente:
 
 $$ \exists \, x . \, (D_l(x) \land \psi)  $$
-dove $\psi$ è ottenuta da $\varphi$\ sostituendo $l \cdot x$ con $x$.
-Dunque la formula $\varphi' = D_l(x) \land \psi$ è una formula ristretta dove
-i coefficienti della $x$ sono $\pm 1$.
+dove $\psi$ è ottenuta da $\varphi$\ sostituendo $l \cdot x$ con $x$.  Dunque la
+formula $\varphi' = D_l(x) \land \psi$ è una formula ristretta dove i
+coefficienti della $x$ sono $\pm 1$.
 
-\subsection{Costruzione di $\varphi'_{- \infty}$}
-Definiamo una nuova formula $\varphi'_{- \infty}$ ottenuta partendo da
-$\varphi'$ e sostituendo tutte le formule atomiche $\alpha$ con $\alpha_{-
-  \infty}$ secondo la seguente tabella:
+\subsection{Costruzione di $\varphi'_{- \infty}$} Definiamo una nuova formula
+$\varphi'_{- \infty}$ ottenuta partendo da $\varphi'$ e sostituendo tutte le
+formule atomiche $\alpha$ con $\alpha_{- \infty}$ secondo la seguente tabella:
 
 \begin{center}
   \begin{tabular}{ l | c }
@@ -162,10 +156,9 @@ $\varphi'$ e sostituendo tutte le formule atomiche $\alpha$ con $\alpha_{-
   \end{tabular}
 \end{center}
 
-\subsection{Calcolo dei boundary points}
-Ad ogni letterale $L[x]$ di $\varphi '$ contenente la $x$ che non è un
-predicato di divisibilit\`a associamo un intero, detto \textbf{boundary point},
-nel seguente modo:
+\subsection{Calcolo dei boundary points} Ad ogni letterale $L[x]$ di $\varphi '$
+contenente la $x$ che non è un predicato di divisibilit\`a associamo un intero,
+detto \textbf{boundary point}, nel seguente modo:
 
 \begin{center}
   \begin{tabular}{ l | c }
@@ -176,37 +169,35 @@ nel seguente modo:
     $0 < -x + t$ &  niente
   \end{tabular}
 \end{center}
-Si osserva come nel caso la formula $\varphi$ contenga più variabili da eliminare
-allora i valori nella colonna di destra possano dipendere da altre variabili.
-Chiamiamo $B$-set l'insieme di questi boundary points.
 
-\subsection{Eliminazione dei quantificatori}
-Quest'ultimo passaggio è semplicemente l'applicazione della seguente
-equivalenza\autocite{cooper}:
+Si osserva come nel caso la formula $\varphi$ contenga più variabili da
+eliminare allora i valori nella colonna di destra possano dipendere da altre
+variabili.  Chiamiamo $B$-set l'insieme di questi boundary points.
+
+\subsection{Eliminazione dei quantificatori} Quest'ultimo passaggio è
+semplicemente l'applicazione della seguente equivalenza\autocite{cooper}:
 
 $$ \exists \, x \, . \, \varphi'[x] \longleftrightarrow \bigvee_{j=1}^m \Big(
-\varphi'_{- \infty}[j] \lor \bigvee_{b \in B}(\varphi'[b+j]) \Big)$$
-dove $\varphi'$ è la formula ristretta in cui i coefficienti della $x$ sono
-sempre $\pm 1$, $m$ è il minimo comune multiplo di tutti i $k$ dei predicati
-di divisbilit\`a $D_k(t)$ che appaiono in $\varphi'$ tali che appaia la $x$ in
-$t$ e infine $B$ \`e il $B$-set relativo a $\varphi'$.
-Considerando quindi il lato destro della precedente equivalenza si ha una
-formula priva del quantificatore esistenziale e si ha dunque ottenuto ciò che
-si voleva.
+\varphi'_{- \infty}[j] \lor \bigvee_{b \in B}(\varphi'[b+j]) \Big)$$ dove
+$\varphi'$ è la formula ristretta in cui i coefficienti della $x$ sono sempre
+$\pm 1$, $m$ è il minimo comune multiplo di tutti i $k$ dei predicati di
+divisbilit\`a $D_k(t)$ che appaiono in $\varphi'$ tali che appaia la $x$ in $t$
+e infine $B$ \`e il $B$-set relativo a $\varphi'$.  Considerando quindi il lato
+destro della precedente equivalenza si ha una formula priva del quantificatore
+esistenziale e si ha dunque ottenuto ciò che si voleva.
 
-\subsection{Complessità computazionale}
-Si accenni solamente al notevole risultato dovuto a Fischer e
-Rabin\autocite{complexity}, nel \date{1974} mostrarono infatti che data $n$ la
-lunghezza di una formula nell'aritmetica di Presburger, ogni problema
-decisionale ha complessità temporale $2^{2^{cn}}$ nel caso peggiore, per qualche
-costante $c \ge 0$. Ovvero l'algoritmo di Cooper è obbligatoriamente
-NP-difficile avendo una complessità almeno esponenziale doppia.
+\subsection{Complessità computazionale} Si accenni solamente al notevole
+risultato dovuto a Fischer e Rabin\autocite{complexity}, nel \date{1974}
+mostrarono infatti che data $n$ la lunghezza di una formula nell'aritmetica di
+Presburger, ogni problema decisionale ha complessità temporale $2^{2^{cn}}$ nel
+caso peggiore, per qualche costante $c \ge 0$. Ovvero l'algoritmo di Cooper è
+obbligatoriamente NP-difficile avendo una complessità almeno esponenziale
+doppia.
 
 \newpage
-\section{Implementazione}
-Il software \`e stato scritto nel linguaggio C rispettando lo standard
-C99\autocite{c99}, in questo capitolo verrà effettuata una discussione riguardo
-l'implementazione.
+\section{Implementazione} Il software \`e stato scritto nel linguaggio C
+rispettando lo standard C99\autocite{c99}, in questo capitolo verrà effettuata
+una discussione riguardo l'implementazione.
 
 \subsection{Struttura e design}
 
@@ -233,11 +224,9 @@ L'algoritmo \`e stato suddiviso in svariate procedure, implementate come singole
 funzioni in C, è possibile eseguire l'intero algoritmo chiamando la funzione
 \inline{char* cooper(char* wff, char* var)}, dove \inline{wff} è una formula ben
 formata (well-formed formula) nel linguaggio SMT-LIB\autocite{smtlib} e
-\inline{var} è la variabile da eliminare.
-Naturalmente la funzione restituisce la formula equivalente priva della
-variabile.
-Si rimanda a più tardi la discussione della forma esatta che deve avere la
-formula in ingresso.
+\inline{var} è la variabile da eliminare.  Naturalmente la funzione restituisce
+la formula equivalente priva della variabile.  Si rimanda a più tardi la
+discussione della forma esatta che deve avere la formula in ingresso.
 
 La funzione \inline{cooper} effettua quindi a sua volta delle chiamate a varie
 funzioni, si è cercato per quanto possibile di mantenere la suddivisione di
@@ -247,63 +236,62 @@ precedentemente.
 Prima di spiegare il comportamento delle singole funzioni occorre accennare che
 l'oggetto principale manipolato dal programma è l'albero sintattico stesso della
 formula. Per ottenere ciò si è creato un tipo strutturato chiamato
-\inline{t_syntaxTree} ad hoc. Si rimanda a più tardi una discussione
-dettagliata del tipo in questione.
+\inline{t_syntaxTree} ad hoc. Si rimanda a più tardi una discussione dettagliata
+del tipo in questione.
 
 La funzione che ha quindi il compito di effettuare il parsing è
 \inline{t_syntaxTree* parse(char* wff)}, ed è questo appena introdotto il tipo
 che ritorna.
 
-Il passo successivo al parsing è la normalizzazione della formula, cioè la generazione
-della formula $\varphi' = D_l(x) \land \psi$, dove i coefficienti della variabile
-da eliminare sono diventati $1$. La segnatura di tale funzione è \inline{void
-  normalize(t_syntaxTree* tree, char* var)}.
+Il passo successivo al parsing è la normalizzazione della formula, cioè la
+generazione della formula $\varphi' = D_l(x) \land \psi$, dove i coefficienti
+della variabile da eliminare sono diventati $1$. La segnatura di tale funzione è
+\inline{void normalize(t_syntaxTree* tree, char* var)}.
 
-Le funzioni \inline{t_syntaxTree* minInf(t_syntaxTree* tree, char* var)} e \newline
-\inline{t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var)}, come è
-facile evincere, generano rispettivamente $\varphi' _{- \infty}$ e l'insieme dei
-boundary points.
+Le funzioni \inline{t_syntaxTree* minInf(t_syntaxTree* tree, char* var)} e
+\newline \inline{t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var)},
+come è facile evincere, generano rispettivamente $\varphi' _{- \infty}$ e
+l'insieme dei boundary points.
 
-Infine \inline{t_syntaxTree* newFormula(t_syntaxTree* tree,
-  t_syntaxTree* minf, char* var)} genera la formula equivalente a partire da
-$\varphi '_{- \infty}$ e della formula normalizzata. \`E al suo interno che viene
-effettuata la chiamata a \inline{boundaryPoints}.
+Infine \inline{t_syntaxTree* newFormula(t_syntaxTree* tree, t_syntaxTree* minf,
+char* var)} genera la formula equivalente a partire da $\varphi '_{- \infty}$ e
+della formula normalizzata. \`E al suo interno che viene effettuata la chiamata
+a \inline{boundaryPoints}.
 
 Esiste inoltre un ulteriore passo opzionale non facente parte dell'algoritmo di
 Cooper, la funzione \inline{void simplify(t_syntaxTree* t)}, che può essere
 chiamata passando come argomento l'output di \inline{newFormula()}, effettua una
 rozza semplificazione della formula. Verrà discusso successivamente in dettaglio
-cosa si intende. 
+cosa si intende.
 
-\subsection{Analisi del codice}
-Quella che viene presentata qui è un'analisi dettagliata del codice sorgente del
-programma riga per riga, si è deciso di seguire il più possibile il flusso di
-esecuzione del programma, in modo da evidenziare i passi dell'algoritmo.
+\subsection{Analisi del codice} Quella che viene presentata qui è un'analisi
+dettagliata del codice sorgente del programma riga per riga, si è deciso di
+seguire il più possibile il flusso di esecuzione del programma, in modo da
+evidenziare i passi dell'algoritmo.
 
-\subsubsection{Funzione \inline{cooperToStr}}
-\srcf{char* cooperToStr}
+\subsubsection{Funzione \inline{cooperToStr}} \srcf{char* cooperToStr}
 
 Alla luce di quanto detto precedentemente il funzionamento di \inline{cooper}
 risulta autoesplicativo. \'E quindi arrivato il momento di esporre la segnatura
 completa del tipo composto \inline{t_syntaxTree}.
 
-\subsubsection{Segnatura di \inline{t_syntaxTree}}
-\srcf{typedef struct t_syntaxTree}
+\subsubsection{Segnatura di \inline{t_syntaxTree}} \srcf{typedef struct
+t_syntaxTree}
 
 Trattasi di un record definito ricorsivivamente avente $3$ campi:
 
 \begin{itemize}
   \item \inline{char nodeName[16]} è una stringa di lunghezza fissata posta
-    arbritrariamente a 16 caratteri, è il nome del nodo nell'albero sintattico.
+arbritrariamente a 16 caratteri, è il nome del nodo nell'albero sintattico.
   \item \inline{int nodesLen} è il numero di figli del nodo in questione
   \item \inline{t_syntaxTree** nodes} è un array di puntatori ad altri nodi
 \end{itemize}
 
-Si consideri la formula in pseudolinguaggio
-$((2 = x) \; \land \; (3y + 4 + 5= 0)) \; \lor \; (x \equiv_{6} 0)$, in
-linguaggio SMT-LIB essa corrisponde a \inline{(and (or (= 2 x) (= (+ (* 3 y) 4
-  5) 0)) (div x 6))} e la sua rappresentazione tramite il tipo composto appena
-definito è chiarificata dal segente diagramma.
+Si consideri la formula in pseudolinguaggio $((2 = x) \; \land \; (3y + 4 + 5=
+0)) \; \lor \; (x \equiv_{6} 0)$, in linguaggio SMT-LIB essa corrisponde a
+\inline{(and (or (= 2 x) (= (+ (* 3 y) 4 5) 0)) (div x 6))} e la sua
+rappresentazione tramite il tipo composto appena definito è chiarificata dal
+segente diagramma.
 
 \begin{center}
   \begin{tikzpicture}[grow=right,
@@ -336,8 +324,7 @@ valente $0$, in tal caso è irrilevante il contenuto del campo \inline{nodes}. S
 approfitta di questo momento per sottolineare l'importanza di una opportuna
 funzione di deallocazione di questa struttura.
 
-\subsubsection{Funzione \inline{recFree}}
-\srcf{void recFree}
+\subsubsection{Funzione \inline{recFree}} \srcf{void recFree}
 
 La natura ricorsiva del tipo \inline{t_syntaxTree} rende notevolmente semplice
 la scrittura di una funzione ricorsiva per la liberazione della memoria, come è
@@ -347,10 +334,9 @@ deallocando nodo per nodo.
 Si passi ora a considerare due funzioni speculari, la funzione
 \inline{t_syntaxTree* parse(char* wff)} che trasforma una stringa nel
 corrispettivo albero sintattico e la funzione \inline{char*
-  treeToStr(t_syntaxTree* tree)} che realizza l'esatto opposto.
+treeToStr(t_syntaxTree* tree)} che realizza l'esatto opposto.
 
-\subsubsection{Funzione \inline{parse}}
-\srcf{t_syntaxTree* parse}
+\subsubsection{Funzione \inline{parse}} \srcf{t_syntaxTree* parse}
 
 La funzione \inline{parse} si appoggia alla funzione \inline{buildTree}, è in
 quest'ultima la funzione, ancora una volta ricorsiva, dove avviene la vera e
@@ -358,15 +344,14 @@ propria costruzione dell'albero. Essa prende in ingresso i token che compongono
 la stringa in ingresso e restituisce l'albero, la parte di suddivisione in token
 viene effettuata (insieme ad altre questioni di gestione della memoria) da
 \inline{parse}. Tali funzioni prevedono che la stringa in ingresso rispetti
-esattamente la sintassi stabilita, e che inoltre, a causa della scelta arbitraria
-di porre $16$ caratteri come lunghezza del campo \inline{nodeName} non siano
-presenti token più lunghi.
+esattamente la sintassi stabilita, e che inoltre, a causa della scelta
+arbitraria di porre $16$ caratteri come lunghezza del campo \inline{nodeName}
+non siano presenti token più lunghi.
 
-\subsubsection{Funzione \inline{treeToStr}}
-\srcf{char* treeToStr}
+\subsubsection{Funzione \inline{treeToStr}} \srcf{char* treeToStr}
 
-Si consideri ora la funzione speculare \inline{treeToStr}, anch'essa si
-appoggia a sua volta ad un'altra funzione, ovvero \inline{recTreeToStr}, è in
+Si consideri ora la funzione speculare \inline{treeToStr}, anch'essa si appoggia
+a sua volta ad un'altra funzione, ovvero \inline{recTreeToStr}, è in
 quest'ultima che avviene la trasformazione da albero in stringa, rendendo quindi
 \inline{treeToStr} funge solamente da una funzione helper.
 
@@ -382,8 +367,7 @@ Ovvero rimangono da discutere le funzioni \inline{normalize}, \inline{minInf} e
 \inline{newFormula}. Si adempia subito all'incombenza data dalla funzione
 \inline{simplify}, di cui si ricorda fare parte di un passo opzionale.
 
-\subsubsection{Funzione \inline{simplify}}
-\srcf{void simplify}
+\subsubsection{Funzione \inline{simplify}} \srcf{void simplify}
 
 Tale funzione effettua una visita in ampiezza dell'albero alla ricerca di nodi
 \inline{or} o \inline{and} ed effettuando una sostituzione di questi ultimi,
@@ -394,24 +378,23 @@ uno di questi casi, in quanto il valore dell'espressione è già determinabile,
 risulta chiaro da questo il perchè della visita in ampiezza e non in profondità.
 Si faccia notare come questa funzione di semplificazione possa essere
 notevolmente migliorata aggiungendo la valutazione delle espressioni, tuttavia
-questa non banale aggiunta esula dallo scopo del progetto.
-In sostanza questa funzione fornisce un buon compromesso tra i benefici che
-porta il poter accorciare le espressioni generate dall'algoritmo e una ulteriore
-complessità aggiunta. Si noti infine come ancora una volta occorre prestare
-attenzione alla corretta deallocazione della memoria.
+questa non banale aggiunta esula dallo scopo del progetto.  In sostanza questa
+funzione fornisce un buon compromesso tra i benefici che porta il poter
+accorciare le espressioni generate dall'algoritmo e una ulteriore complessità
+aggiunta. Si noti infine come ancora una volta occorre prestare attenzione alla
+corretta deallocazione della memoria.
 
 \`E giunto infine il momento di analizzare la funzione \inline{normalize}, tale
 funzione si appoggia a sua volta alle funzione \inline{getLCM} che a sua volta
 richiama \inline{gcd} e \inline{lcm}.
 
-\subsubsection{Funzioni \inline{gcd} e \inline{lcm}}
-\srcf{long int gcd}
+\subsubsection{Funzioni \inline{gcd} e \inline{lcm}} \srcf{long int gcd}
 \srcf{long int lcm}
 
 Come è facile immaginare tali funzioni effettuano semplicemente il calcolo del
 massimo comun divisore e del minimo comune multiplo. Il primo viene svolto
-efficacemente dall'algoritmo di Euclide\autocite{euclid} mentre il secondo
-è dato banalmente dalla seguente.
+efficacemente dall'algoritmo di Euclide\autocite{euclid} mentre il secondo è
+dato banalmente dalla seguente.
 
 $$lcm(a, b) = \frac{a b}{GCD(a, b)}$$
 
@@ -419,18 +402,17 @@ La funzione \inline{getLCM} prende in ingresso l'albero sintattico e una
 variabile e restituisce il minimo comune multiplo di tutti i coefficienti di
 tale variabile presenti nella formula.
 
-\subsubsection{Funzione \inline{getLCM}}
-\srcf{int getLCM}
+\subsubsection{Funzione \inline{getLCM}} \srcf{int getLCM}
 
 \inline{getLCM} visita ogni nodo dell'albero alla ricerca dei coefficienti della
 variabile \inline{var}, ovvero cerca nodi della forma \inline{(* c var)} dove
 appunto \inline{var} è la variabile da eliminare mentre \inline{c} è il
 coefficiente. \'E importante sottolineare come i nodi debbano avere il
 coefficiente in \inline{.nodes[0]} e la variabile in \inline{.nodes[1]}, cioè
-nodi della forma \inline{(* var c)} non vengono correttatamente gestiti.
-Tale compromesso porta sicuramente ad una perdita di generalità che in questo
-caso particolare potrebbe anche essere evitata, ma lo stesso non si potrà dire
-in seguito, pertanto verrà assunto un tale input.
+nodi della forma \inline{(* var c)} non vengono correttatamente gestiti.  Tale
+compromesso porta sicuramente ad una perdita di generalità che in questo caso
+particolare potrebbe anche essere evitata, ma lo stesso non si potrà dire in
+seguito, pertanto verrà assunto un tale input.
 
 Risulta quindi ora utile discutere quale sia la forma esatta dell'input gestito
 dal programma, molte assunzioni che portano a perdita di generalità sono state
@@ -440,29 +422,29 @@ per due motivi:
 
 \begin{itemize}
   \item Già allo stato attuale il programma ha presentato molte difficoltà di
-    natura tecnica non inerenti all'implementazione dell'algoritmo. Considerare
-    una gamma più ampia di input avrebbe aggiunto una notevole complessità
-    derivante dall'utilizzo del C senza nessuna libreria di supporto.
+natura tecnica non inerenti all'implementazione dell'algoritmo. Considerare una
+gamma più ampia di input avrebbe aggiunto una notevole complessità derivante
+dall'utilizzo del C senza nessuna libreria di supporto.
   \item L'obiettivo finale di questo progetto è quello di aggiungere una
-    funzionalità al software MCMT\autocite{mcmt}, scrivere una libreria di
-    supporto per poter gestire più input avrebbe comportato la riscrittura di
-    molto codice già presente in MCMT. Allo stesso tempo interfacciarsi al
-    software preesistente avrebbe reso vincolato troppo il progetto, si è
-    preferito un approccio intermedio in modo da poter comunque rendere questo
-    software il più stand-alone possibile.
+funzionalità al software MCMT\autocite{mcmt}, scrivere una libreria di supporto
+per poter gestire più input avrebbe comportato la riscrittura di molto codice
+già presente in MCMT. Allo stesso tempo interfacciarsi al software preesistente
+avrebbe reso vincolato troppo il progetto, si è preferito un approccio
+intermedio in modo da poter comunque rendere questo software il più stand-alone
+possibile.
 \end{itemize}
 
 Si passi dunque ad esaminare la forma di albero più generale possibile in grado
 di essere manipolata dal programma; il nodo principale deve essere un
 \inline{and} con almeno $1$ figlio, tutti i figli di questo nodo devono essere
-obbligatoriamente \inline{=}, \inline{>} o \inline{div}.
-Sia \inline{=}, \inline{>} che \inline{div} devono avere esattamente $2$ figli,
-il primo (cioè \inline{.nodes[0]}) deve essere un polinomio lineare mentre il
-secondo (cioè \inline{.nodes[1]}) deve essere una costante. Il polinomio lineare
-deve sempre essere della forma \inline{(+ (* c1 x1) (* c2 x2) ... (* c3
-  x3))}, dove come prima, il primo figlio di \inline{*} è una costante e il
-secondo è una variabile. La sintassi è questa anche nel caso una delle
-costanti sia uguale a $1$.
+obbligatoriamente \inline{=}, \inline{>} o \inline{div}.  Sia \inline{=},
+\inline{>} che \inline{div} devono avere esattamente $2$ figli, il primo (cioè
+\inline{.nodes[0]}) deve essere un polinomio lineare mentre il secondo (cioè
+\inline{.nodes[1]}) deve essere una costante. Il polinomio lineare deve sempre
+essere della forma \inline{(+ (* c1 x1) (* c2 x2) ... (* c3 x3))}, dove come
+prima, il primo figlio di \inline{*} è una costante e il secondo è una
+variabile. La sintassi è questa anche nel caso una delle costanti sia uguale a
+$1$.
 
 Non è difficile convincersi che ogni albero può essere trasformato, con mere
 manipolazioni simboliche, in un albero di questa forma. Per rendere più chiaro
@@ -480,8 +462,8 @@ presenti costanti tra i figli del nodo \inline{+}.
        (div (+ (* 1 x)) 2))
 \end{minted}
 
-Ed ecco il listato relativo alla funzione \inline{normalize} nella
-sua interezza, si osservi come esso prenda in ingresso l'albero sintattico della
+Ed ecco il listato relativo alla funzione \inline{normalize} nella sua
+interezza, si osservi come esso prenda in ingresso l'albero sintattico della
 formula e la variabile da eliminare ma ritorni effettivamente \inline{void},
 ovvero si osservi come modifichi l'albero senza costruirne uno nuovo. Si faccia
 anche caso a come tale funzione sia fortemente vincolata alla rigida struttura
@@ -489,52 +471,48 @@ sintattica che è stata supposta. Tale funzione oltre a normalizzare la formula
 (tutti i coefficienti della variabile da eliminare diventano $1$) agginuge anche
 un opportuno predicato di divisibilità come specificato nell'algoritmo.
 
-\subsubsection{Funzione \inline{normalize}}
-\srcf{void normalize}
+\subsubsection{Funzione \inline{normalize}} \srcf{void normalize}
 
 La funzione \inline{minInf}, come suggerisce il nome, riceve in ingresso la
 formula normalizzta $\varphi'$ e restituisce $\varphi'_{- \infty}$. A differenza
 della funzione precedente essa restituisce effettivamente il nuovo albero.
 
-\subsubsection{Funzione \inline{minInf}}
-\srcf{t_syntaxTree* minInf}
+\subsubsection{Funzione \inline{minInf}} \srcf{t_syntaxTree* minInf}
 
 Prima di passare alla discussione della funzione \inline{newFormula}, che
 effetivamente restituisce la formula equivalente senza variabile, è bene
 discutere di alcune altre funzioni a cui essa si appoggia, cioè \inline{calcm} e
-\inline{boundaryPoints}.
-La funzione \inline{int calcm(t_syntaxTree* tree, char* var)} prende in ingresso
-l'albero della formula $\varphi'$ e la variabile da eliminare e restituisce il
-minimo comune multiplo di tutti i coefficienti della $x$ che appaiono nella
-formula, cioè calcola $m$ dell'equivalenza di cui si è giò discusso.
+\inline{boundaryPoints}.  La funzione \inline{int calcm(t_syntaxTree* tree,
+char* var)} prende in ingresso l'albero della formula $\varphi'$ e la variabile
+da eliminare e restituisce il minimo comune multiplo di tutti i coefficienti
+della $x$ che appaiono nella formula, cioè calcola $m$ dell'equivalenza di cui
+si è giò discusso.
 
 $$ \exists \, x \, . \, \varphi'[x] \longleftrightarrow \bigvee_{j=1}^m \Big(
 \varphi'_{- \infty}[j] \lor \bigvee_{b \in B}(\varphi'[b+j]) \Big)$$
 
-\subsubsection{Funzione \inline{calcm}}
-\srcf{int calcm}
+\subsubsection{Funzione \inline{calcm}} \srcf{int calcm}
 
 La funzione \inline{t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var)}
-riceve ancora in ingresso l'albero sintattico della formula $\varphi'_{- \infty}$
-e restituisce il $B$-set $B$ della formula. Per semplicità di rappresentazione
-si è scelto di usare ancora come tipo per l'output sempre
+riceve ancora in ingresso l'albero sintattico della formula $\varphi'_{-
+\infty}$ e restituisce il $B$-set $B$ della formula. Per semplicità di
+rappresentazione si è scelto di usare ancora come tipo per l'output sempre
 \inline{t_syntaxTree}, dove però l'albero avrà come \inline{.nodeName} la
 stringa arbitraria \inline{"bPoints"}, tale scelta non ha nessun impatto e
 facilita semplicemente il debugging.
 
-\subsubsection{Funzione \inline{boundaryPoints}}
-\srcf{t_syntaxTree* boundaryPoints} 
+\subsubsection{Funzione \inline{boundaryPoints}} \srcf{t_syntaxTree*
+boundaryPoints}
 
 Si discuta ora la funzione che restituisce la formula equivalente che poi
 \inline{cooper} ritorna, tale funzione è \inline{t_syntaxTree*
-  newFormula(t_syntaxTree* tree, t_syntaxTree* minf, char* var)}, essa non è
-altro che l'applicazione dell'equivalenza già esposta più volte. Prende in
-ingresso le forumule $\varphi'$ e $\varphi'_{-\infty}$ e la variabile da
-eliminare, è al suo interno che vengono effettuate le chiamate a
-\inline{boundaryPoints} e \inline{calcm}.
+newFormula(t_syntaxTree* tree, t_syntaxTree* minf, char* var)}, essa non è altro
+che l'applicazione dell'equivalenza già esposta più volte. Prende in ingresso le
+forumule $\varphi'$ e $\varphi'_{-\infty}$ e la variabile da eliminare, è al suo
+interno che vengono effettuate le chiamate a \inline{boundaryPoints} e
+\inline{calcm}.
 
-\subsubsection{Funzione \inline{newFormula}}
-\srcf{t_syntaxTree* newFormula}
+\subsubsection{Funzione \inline{newFormula}} \srcf{t_syntaxTree* newFormula}
 
 La funzione \inline{newFormula} non fa altro che invocare \inline{calcm} e
 \inline{boundaryPoints} e generare l'albero della nuova formula equivalente,
@@ -545,14 +523,13 @@ prende ingresso un albero, una variabile e un valore e va a sostituire il valore
 alla variabile.
 
 Trattasi ovviamente della funzione \inline{void eval(t_syntaxTree* tree, char*
-  var, t_syntaxTree* val)}, si osservi anche qui come ovviamente tale funzione
+var, t_syntaxTree* val)}, si osservi anche qui come ovviamente tale funzione
 potrebbe essere resa più sofisticata aggiungendo una effettiva valutazione delle
 operazioni aritmetiche o logiche, ma come prima anche questo avrebbe aggiunto
 una ulteriore complessità al progetto, pertanto si è scelto di non proseguire in
 questa strada.
 
-\subsubsection{Funzione \inline{eval}}
-\srcf{void eval}
+\subsubsection{Funzione \inline{eval}} \srcf{void eval}
 
 \newpage
 \section{Utilizzo}
@@ -563,15 +540,14 @@ funzione \inline{cooper}, tutto quello che sta per essere esposto è al solo
 scopo di fornire una interfaccia che permetta di verificare il corretto
 funzionamento dell'algoritmo.
 
-\subsection{Il programma \inline{test.c}}
-Si consideri il seguente programma di esempio contenuto in \inline{test.c}:
+\subsection{Il programma \inline{test.c}} Si consideri il seguente programma di
+esempio contenuto in \inline{test.c}:
 
 \inputminted[linenos, mathescape=true]{C}{../test.c}
 
 Si consideri ora il seguente \inline{makefile}:
 
-\subsection{Il Makefile}
-\inputminted[linenos]{makefile}{../makefile}
+\subsection{Il Makefile} \inputminted[linenos]{makefile}{../makefile}
 
 \'E semplice immaginare cosa facciano le regole \inline{run}, \inline{valgrind},
 \inline{debug} e \inline{clean}. Ci si soffermi ora su \inline{eval} e
@@ -598,7 +574,7 @@ Tale regola esegue il seguente script Python\autocite{python}.
 Tale script genera un opportuno sorgente \inline{source.ys} per
 Yices\autocite{yices} e successivamente lo esegue, per esempio se la regola
 \inline{make sat} esegue \inline{./sat.py "(and (> (+ (* 2 x) (* 3 y)) 1))" "x
-  y"  "x"} allora viene generato il seguente \inline{source.ys} che viene poi
+y" "x"} allora viene generato il seguente \inline{source.ys} che viene poi
 eseguito da Yices che restituisce la stringa \inline{"sat"}.
 
 \begin{minted}{scheme}
@@ -624,8 +600,7 @@ fiducia nella stessa.
 \newpage
 \tableofcontents
 
-\newpage
-\printbibliography
+\newpage \printbibliography
 
 
 \end{document}
