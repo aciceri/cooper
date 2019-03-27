@@ -7,9 +7,15 @@
 \usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
 \usepackage{amsfonts}
 \usepackage{amsthm}
+\usepackage{mathrsfs}
 \usepackage{tikz}
 \usepackage{pythontex}
 \usepackage[backend=bibtex,style=verbose-trad2]{biblatex}
+\usepackage{enumitem}
+\usepackage{amssymb}
+
+\newtheorem{theorem}{Theorem}[section]
+
 
 \bibliography{elaborato} 
 
@@ -138,7 +144,7 @@ Quindi ora tutti i coefficienti della $x$ in $\varphi$ sono $\pm l$, passiamo
 ora a considerare la seguente formula equivalente:
 
 $$ \exists \, x . \, (D_l(x) \land \psi)  $$
-dove $\psi$ è ottenuta da $\varphi$\ sostituendo $l \cdot x$ con $x$.  Dunque la
+2dove $\psi$ è ottenuta da $\varphi$\ sostituendo $l \cdot x$ con $x$.  Dunque la
 formula $\varphi' = D_l(x) \land \psi$ è una formula ristretta dove i
 coefficienti della $x$ sono $\pm 1$.
 
@@ -186,15 +192,117 @@ e infine $B$ \`e il $B$-set relativo a $\varphi'$.  Considerando quindi il lato
 destro della precedente equivalenza si ha una formula priva del quantificatore
 esistenziale e si ha dunque ottenuto ciò che si voleva.
 
-\subsection{Complessità computazionale} Si accenni solamente al notevole
-risultato dovuto a Fischer e Rabin\autocite{complexity}, nel \date{1974}
-mostrarono infatti che data $n$ la lunghezza di una formula nell'aritmetica di
-Presburger, ogni problema decisionale ha complessità temporale $2^{2^{cn}}$ nel
-caso peggiore, per qualche costante $c \ge 0$. Ovvero l'algoritmo di Cooper è
-obbligatoriamente NP-difficile avendo una complessità almeno esponenziale
-doppia.
+\newpage
+
+\section{Complessità computazionale}
+In questa sezione verrà formalizzata in modo rigoroso una versione equivalente
+dell'algoritmo di Cooper, la quale permetterà di ottenere una stima superiore
+della complessità.
+Si vedrà infatti che, in un senso che verrà chiarito successivamente, se $n$ è
+la dimensione della formula in ingresso, allora la formula equivalente senza
+variabili non potrà avere dimensione maggiore di $2^{2^{2^{pn}}}$, per qualche
+costante $p$ > 1. Questo fornisce un bound superiore alla complessità temporale.
+
+Una ulteriore osservazione non rigorosa è la seguente; Fischer e Rabin
+\autocite{fischer-rabin} hanno trovato un bound inferiore per la complessità di
+una versione non deterministica dell'algoritmo, e tale bound risulta avere un
+esponenziale in meno. Dunque, siccome algoritmi deterministici che emulano
+algoritmi non deterministici non possono che introdurre un esponenziale nella
+complessità, risulta auspicabile che il bound superiore trovato non sia
+migliorabile.
+
+
+\subsection{Formalizzazione dell'aritmetica di Presburger}
+Si definiscano i simboli del'aritmetica di Presburger:
+$$ \mathscr{L} = \{(, ), \land, \lor, \exists, \forall, =, <, +, -, 0, 1, x, y,
+z, \dots \}$$
+I simboli $x, y, z, \dots$ sono chiamati variabili, essi possono ammettere un
+pedice. Una espressione è una successione finita di simboli, si chiami quindi
+$\mathscr{L}^{+}$ il linguaggio delle espressioni nell'aritmetica di Presburger.
+Un termine è definito nel modo seguente:
+
+\begin{itemize}
+  \item Le variabili e i simboli $0$ e $1$ sono termini.
+  \item Se $t_1$ e $t_2$ sono termini, lo sono anche $(t_1 + t_2)$ e $-t$.
+  \item Questi sono gli unici termini.
+\end{itemize}
+
+Una formula atomica è una espressione del tipo $(t_1 < t_2)$ o $(t_1 = t_2)$,
+dove $t_1$ e $t_2$ sono termini.
+Una formula è definita come segue:
+\begin{itemize}
+  \item Un atomo è una formula
+  \item Se $A$ e $B$ sono formule e $x$ è una variabile, allora $\exists \, x \,
+    A$, $\forall \, x \, B$, $(A \land B)$, $(A \lor B)$ e $\lnot A$ sono ancora formule.
+  \item Queste sono le sole formule.
+\end{itemize}
+
+Si chiami frase una formula che non ha variabili libere.
+La semantica del linguaggio è quella naturale, si osservi solo che, per
+convenienza di scrittura, verranno usati anche i numerali ($2, 3, \dots$) e
+altri simboli non facente parti del linguaggio. Ciononostante essi potranno
+sempre essere sostituiti con una composizione dei simboli appena esposti, dunque
+non andranno ad inficiare la validità dell'argomento.
+
+\subsection{L'algoritmo di Cooper come procedura decisionale}
+L'algoritmo di Cooper, se iterato su di una frase in $\mathscr{L}$ permette di
+eliminare tutti i quantificatori, e quindi di valutare la verità di tale
+frase. In tale senso può essere inteso come procedura decisonale.
+Vengono quindi mostrati i passaggi effettuati dall'algoritmo in una singola
+iterazione.
+
+Conseriamo una formula in ingresso della forma $\exists \, x \, F(x)$, dove $F$
+è senza quantificatori. Innanzitutto si osservi che assumere il quantificatore
+esistenziale non è limitativo in quanto se fosse presente $\forall \, x$, esso
+potrebbe essere semplicemente sostituito con $\lnot \, \exists \, x \, \lnot$.
+
+\begin{enumerate}[label=Step \arabic*.]
+\item Si eliminano le negazioni logiche portando i $\lnot$ il più lontano
+  possibile dagli atomi (per esempio usando le leggi di De Morgan) e
+  successivamente si sostituiscono i letterali che consistono di atomi negati con
+  atomi equivalenti non negati. (e.g. sostituire $\lnot (x \leq a)$ con $x = a$)
+  A questo punto si sostituiscono tutte le formule che contengono altri simboli
+  che non siano $<$, $\mid$ or $\nmid$ in formule equivalenti contenenti solo $<$. 
+\item Sia $\delta'$ il minimo comune multiplo dei coefficienti della $x$, si
+  moltiplicano ambo i lati di tutti gli atomi contenenti $x$ per costanti
+  appropriate in modo tutti i coefficienti della $x$ siano $\delta'$.
+  Infine si sostutuisce $\exists \, x \, F(\delta' x)$ con $\exists \, x \,
+  (F(x) \land \delta' \mid x)$.
+  Si ha quindi ottenuto una formula equivalente dove ogni atomo che non contiene
+  la $x$ deve essere obbligatoriamente in una delle seguenti forme.
+  \begin{enumerate}[label=\Alph*.]
+    \item $x < a_i$
+    \item $b_i < x$
+    \item $\delta_i \mid x + c_i$
+    \item $\epsilon_i \nmid x + d_i$
+  \end{enumerate}
+  Dove $a_i, b_i, c_i$ e $d_i$ sono espressioni senza $x$ e $\delta_i$ e
+  $\epsilon_i$ sono interi positivi.
+\item Sia $\delta$ il minimo comune multiplo dei $\delta_i$ e dei
+  $\epsilon_i$. Sia $F_{- \infty}(x)$ il risultato che si ottiene sostituendo in
+  $F(x)$ tutte le occrrenze di atomi nella forma $A$ e $B$ con $true$ e
+  $false$ rispettivamente. Analogamente si costruisce $F_{\infty}(x)$, dove però
+  gli atomi nella forma $A$ vengono sostituiti con $false$ e quelli nella forma
+  $B$ con $true$.
+  Se il numero degli atomi di tipo $A$ supera il numero degli atomi di tipo $B$
+  si sostituisca $\exists \, x \, F(x)$ con
+  $$ F^{-\infty} =  \bigvee_{j=1}^{\delta} F_{- \infty}(j) \lor
+  \bigvee_{j=1}^{\delta} \bigvee_{b_i} F(b_i + j)$$
+  Altrimenti si sostuisca con
+  $$ F^{\infty} =  \bigvee_{j=1}^{\delta} F_{\infty}(-j) \lor
+  \bigvee_{j=1}^{\delta} \bigvee_{a_i} F(a_i - j)$$
+\end{enumerate}
+
+\subsection{Analisi e stima della complessità}
+\begin{theorem}[Pythagorean theorem]
+\label{pythagorean}
+This is a theorema about right triangles and can be summarised in the next 
+equation 
+\[ x^2 + y^2 = z^2 \]
+\end{theorem}
 
 \newpage
+
 \section{Implementazione} Il software \`e stato scritto nel linguaggio C
 rispettando lo standard C99\autocite{c99}, in questo capitolo verrà effettuata
 una discussione riguardo l'implementazione.

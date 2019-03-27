@@ -589,6 +589,7 @@ void adjustForYices(t_syntaxTree* t) {
   for (int i=0; i<t->nodesLen; i++) {
     if (strcmp(t->nodes[i]->nodeName, "div") == 0) {
       t_syntaxTree* pt = t->nodes[i];
+      strcpy(pt->nodeName, "mod");
       t->nodes[i] = malloc(sizeof(t_syntaxTree));
       strcpy(t->nodes[i]->nodeName, "=");
       t->nodes[i]->nodesLen = 2;
@@ -614,7 +615,7 @@ char* cooperToStr(char* wff, char* var) {
   //printf("\nNormalizzato%s\n\n", treeToStr(tree));
   minf = minInf(tree, var); //Restituisce l'albero di $\varphi_{- \infty}$
   f = newFormula(tree, minf, var); //Restituisce la formula equivalente
-  //simplify(f); //opzionale
+  simplify(f); //opzionale
   adjustForYices(f);
   str = treeToStr(f); //Genera la stringa a partire dall'albero
   
@@ -636,6 +637,7 @@ char** cooperToArray(char* wff, char* var, int* len) {
   minf = minInf(tree, var); //Restituisce l'albero di $\varphi_{- \infty}$
   f = newFormula(tree, minf, var); //Restituisce la formula equivalente
   simplify(f); //opzionale
+  adjustForYices(f);
 
   *len = f->nodesLen;
 
@@ -647,7 +649,6 @@ char** cooperToArray(char* wff, char* var, int* len) {
     strcpy(array[i], buffer);
     free(buffer);
   }
-  
  
   recFree(tree); //Libera la memoria
   recFree(minf);
