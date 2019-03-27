@@ -1,7 +1,5 @@
 # Algoritmo di Cooper implementato in C
 
-[![asciicast](https://asciinema.org/a/g43857JHmxfwaWErEJYEMMrjp.svg?autoplay=1)](https://asciinema.org/a/g43857JHmxfwaWErEJYEMMrjp?autoplay=1)
-
 ## Introduzione
 Questo repository contiene la mia implementazione di una versione ridotta
 dell'algoritmo di eliminazione dei quantificatori nell'aritmetica di Presburger
@@ -38,7 +36,7 @@ equivalente non contiene più variabili
 
 ## Documentazione
 L'[elaborato](doc/elaborato.pdf) che si trova all'interno di `/doc/`
-contiene una breve introduzione teorica, la discussione
+contiene una breve introduzione teorica , la discussione
 dell'implementazione e alcune informazioni sull'utilizzo (tra cui esempi).
 
 

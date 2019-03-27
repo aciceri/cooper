@@ -8,13 +8,14 @@
 \usepackage{amsfonts}
 \usepackage{amsthm}
 \usepackage{mathrsfs}
+\usepackage{mathtools}
 \usepackage{tikz}
 \usepackage{pythontex}
 \usepackage[backend=bibtex,style=verbose-trad2]{biblatex}
 \usepackage{enumitem}
 \usepackage{amssymb}
 
-\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}{Lemma}
 
 
 \bibliography{elaborato} 
@@ -262,7 +263,8 @@ potrebbe essere semplicemente sostituito con $\lnot \, \exists \, x \, \lnot$.
   successivamente si sostituiscono i letterali che consistono di atomi negati con
   atomi equivalenti non negati. (e.g. sostituire $\lnot (x \leq a)$ con $x = a$)
   A questo punto si sostituiscono tutte le formule che contengono altri simboli
-  che non siano $<$, $\mid$ or $\nmid$ in formule equivalenti contenenti solo $<$. 
+  relazionali che non siano $<$, $\mid$ or $\nmid$ in formule equivalenti
+  contenenti solo $<$.
 \item Sia $\delta'$ il minimo comune multiplo dei coefficienti della $x$, si
   moltiplicano ambo i lati di tutti gli atomi contenenti $x$ per costanti
   appropriate in modo tutti i coefficienti della $x$ siano $\delta'$.
@@ -291,15 +293,126 @@ potrebbe essere semplicemente sostituito con $\lnot \, \exists \, x \, \lnot$.
   Altrimenti si sostuisca con
   $$ F^{\infty} =  \bigvee_{j=1}^{\delta} F_{\infty}(-j) \lor
   \bigvee_{j=1}^{\delta} \bigvee_{a_i} F(a_i - j)$$
+  A questo punto non resta che effettuare una semplificazione raccogliendo
+  termini simili.
 \end{enumerate}
 
 \subsection{Analisi e stima della complessità}
-\begin{theorem}[Pythagorean theorem]
-\label{pythagorean}
-This is a theorema about right triangles and can be summarised in the next 
-equation 
-\[ x^2 + y^2 = z^2 \]
-\end{theorem}
+Sarà messa in relazione la crescita del numero degli atomi e la grandezza delle
+costanti con il numero dei coefficienti distinti che appaiono.
+Si cominci mostrando il seguente risultato preliminare.
+
+\begin{lemma}
+  Si consideri la formula
+  $$Q_m x_m Q_{m-1} x_{m-1} \dots Q_2 x_2 Q_1 x_1 \, F(x_1, x_2,
+  \dots, x_m)$$
+  dove $Q_i = \exists$ oppure $Q_i = \forall$ e $F$ è una
+  formula senza quantificatori. 
+  Sia $c_k$ la somma del numero di interi positivi distinti che appaiono negli
+  atomi della forma $\delta_i \mid t$ e $\epsilon_i \nmid t$ e del numero dei
+  coefficienti distinti delle variabili nella formula $$F_k=Q_m x_m Q_{m-1} x_{m-1}
+  \dots Q_{k+1} x_{k+1} \, F'_k(x_{k+1}, \dots, x_m)$$ prodotta dopo la $k$-esima
+  iterazione.
+  Analogamente sia $s_k$ il massimo dei valori assoluti delle costanti intere,
+  compresi i coefficienti della variabili.
+  Infine sia $a_k$ il numero totale degli atomi in $F_k$.
+  
+  Allora valgono le seguenti relazioni:
+  $$c_1 \le c^4 \qquad s_1 \le s^{4c} \qquad a_1 \le a^4s^{2c}$$
+
+\end{lemma}
+\begin{proof}
+  Siano $a', a'', a'''$ il numero degli atomi dopo gli step $1$ e $2$ e $3$,
+  assumendo che $a$ sia il numero degli atomi prima dell'esecuzione
+  dell'algoritmo.
+  Analogamnete si definiscano $c', c'', c'''$ e $s', s'', s'''$. Si ripercorrano
+  ora i passi dell'algoritmo, considerando mano a mano delle stime per tali
+  valori.
+  \begin{enumerate}[label=Step \arabic*.]
+  \item L'eliminazione delle negazioni logiche non altera nè $c'$ nè $s'$ nè
+    $a'$, l'elminazione dei simboli relazionali che non sono $\mid$, $\nmid$ o
+    $<$ potrebbe raddoppiare il numero di atomi e potrebbe incrementare di $1$
+    il massimo dei valori assoluti delle costanti che non appaiono come
+    coefficienti dell variabili.
+    Il numero di atomi con simboli relazionali $\mid$ o $\nmid$ resta al massimo
+    $a$, dunque, una volta terminato il primo step dell'algoritmo si è nella
+    seguente situazione:
+    $$ a' \le 2a \qquad s' \le s + 1 \qquad c' \le c $$
+  \item Sostituire $x$ con $\delta' x$ potrebbe modificare il valore di $s'$, il
+    caso peggiore si verifica quando un atomo contiene sia il termine $x$ (con
+    coefficiente $1$) che il termine $s'$. Il termine costante $s'$ diventa
+    $\delta' s'$, dove $\delta'$ è il minimo comune multiplo dei coefficienti
+    della $x$. Siccome ci sono al massimo $c$ coefficienti distinti della $x$, e
+    ognuno di essi vale al massimo $s$, allora $\delta' \le s^c$.
+    Dunque $s'' \le s^cs' \le (s+1)^{c+1}$.
+    
+    Anche il valore di $c''$ può venire alterato, ci sono al massimo $c-1$
+    variabili oltre alla $x$ con coefficienti diversi da ogni coefficiente della
+    $x$, inoltre ci sono al massimo $c$ coefficienti $c$ coefficienti distinti
+    per la $x$. Dunque, $c'$ può crescere al massimo fino a $c(c-1)+2$, dove
+    $+2$ è dovuto da un $+1$ per l'eventuale nuovo coefficiente della $x$ (che
+    diventa $1$) e un $+1$ è dovuto dalla costante $\delta'$ in $\delta' \mid
+    x$. Infine questo step incrementa di $1$ il numero di atomi, riassumendo si
+    ha dunque il seguente bilancio.
+    $$ a'' \le 2a + 1 \qquad s'' \le (s+1)^{c+1} \qquad c'' \le c^2$$
+
+  \item Si consideri prima $a'''$, il numero degli atomi in
+    $\bigvee_{j=1}^\delta F_{-\infty}(j)$ è al massimo $\delta (a+1)$ siccome
+    tutti gli atomi con il simbolo relazionale $<$ sono sostituiti da $true$ o
+    $false$ e siccome ci sono al massimo $a+1$ atomi della forma $\delta_i \mid
+    x + d_i$ o $\epsilon_i \nmid x + e_i$. A questo punto, grazie agli step $1$
+    e $2$, il numero di termini $b_i$ è al massimo $a$, inoltre ci sono al
+    massimo $2a + 1$ atomi in $F(b_i + j)$. Quindi il numero di atomi in
+    $\bigvee_{j=1}^\delta \bigvee_{b_i} F(b_i + j)$ è dominato superiormente da
+    $\delta a (2a + 1)$ e il numero di atomi $a'''$ in $F^{-\infty}$ è al
+    massimo $\delta (2a^2 +2a +1) \le \delta a^4$, per $a > 1$.
+
+    Occorre trovare ora bound superiore per $\delta$, ogni costante $\delta_i$ o
+    $\epsilon_i$ che appare in atomi della forma $\delta_i \mid x + d_i$ o
+    $\epsilon_i \nmid x + e_i$ è il prodotto di due interi $\alpha$ e $\beta$,
+    dove $\alpha \le s$ e $\beta \mid \delta'$, ciò segue dal passo $2$.
+    Ci sono al massimo $c$ valori di $\alpha$ distinti, quindi il minimo comune
+    multiplo $\delta$ di tutti i $\delta_i$ e $\epsilon_i$ è al massimo
+    $s^c\delta'$. Dunque $\delta \le s^{2c}$ e $a''' \le a^4s^{2c}$.
+
+    La semplificazione dovuta al raccoglimento dei termini simili potrebbe
+    alterare sia $s'''$ che $c'''$, la costante più grande potrebbe diventare
+    $2s'' + 2^{2c} \le 2(s+1)^{c+1}+s^{2c} \le 3(s+1)^{2c}$.
+    Un argomento simile a quello dato al passo $2$ di questa dimostrazione
+    fornisce una stima superiore per $c'''$, ovvero $c''' \le c^4$. Riassumendo:
+    $$ a''' \le a^4s^{2c} \qquad s''' \le 3(s + 1)^{2c} \qquad c''' \le c^4 $$
+    Tuttavia per i nostri scopi saranno sufficienti le seguenti:
+    $$ a_1 \le a^4s^{2c} \qquad s_1 \le s^{4c} \qquad c_1 \le c^4 $$
+    per $s, c > 2$
+  \end{enumerate}
+\end{proof}
+
+\begin{lemma}
+  Se $s, c > 2$, allora
+  $$ c_k \le c^{4^k} \qquad s_k \le s^{(4c)^{4^k}} \qquad a_k \le a^{4^k}s^{(4c)^{4^k}}$$
+\end{lemma}
+\begin{proof}
+  Per induzione sul lemma precedente.
+\end{proof}
+
+Si supponga dunque ora che sia data una frase di lunghezza $n$ la quale codifica
+$$Q_m x_m Q_{m-1} x_{m-1} \dots Q_2 x_2 Q_1 x_1 \, F(x_1, x_2, \dots, x_m)$$
+Si desidera trovare un bound superiore allo spazio richiesto dalla formula senza
+quantificatori $F_m$. Si può assumere che $m \le n, c \le n, a \le n, s \le n$,
+per ogni $k$ lo spazio richiesto per immagazzinare $F_k$ è stimato dall'alto dal
+prodotto del numero degli atomi $a_k$ in $F_k$, il massimo numero $m+1$ di
+costanti per atomo, la massima quantità di spazio $s_k$ richiesta per
+immagazzinare ogni costante e una qualche costante $q$. Si osservi che il
+fattore $q$ è dovuto ai vari operatori logici e aritmetici.
+Dunque lo spazio per immagazzinare $F_k$ è stimato superiormente da
+$$ q \cdot n^{4^n} \cdot n^{(4n)^{4^n}} \cdot (n+1) \cdot n^{(4n)^{4^n}} \le
+2^{2^{2^{pn}}}$$
+per una qualche costante $p > 1$
+Si affermi che il bound superiore della complessità temporale dell'algoritmo è
+dominato dal quadrato del tempo richiesto per generare la $F_k$ più
+lunga. Dunque il bound spaziale appena ottenuto è in realtà anche un bound
+temporale.
+
 
 \newpage
 
