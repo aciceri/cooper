@@ -1,0 +1,78 @@
+=>PYTHONTEX#CC:py:begin#none#none#0#code#####29#
+def lines(f_name):
+    with open("../cooper.c", "r") as source_file:
+        lines = source_file.readlines()
+        found = False
+        for i, line in enumerate(lines):
+            if not found and f_name in line:
+                starting_line = i + 1
+                found = True
+                brackets = 0
+            if found:
+                brackets += line.count("{")
+                brackets -= line.count("}")
+                if brackets == 0:
+                    ending_line = i + 1
+                    break
+
+        if found:
+            return "\src{{{%d}}}{{{%d}}}" % (starting_line, ending_line)
+        else:
+            return "inline{%s}" % f_name
+=>PYTHONTEX#py#default#default#0#c#####272#
+print(lines("char* cooperToStr"))
+=>PYTHONTEX#py#default#default#1#c#####279#
+print(lines("typedef struct t_syntaxTree"))
+=>PYTHONTEX#py#default#default#2#c#####327#
+print(lines("void recFree"))
+=>PYTHONTEX#py#default#default#3#c#####339#
+print(lines("t_syntaxTree* parse"))
+=>PYTHONTEX#py#default#default#4#c#####351#
+print(lines("char* treeToStr"))
+=>PYTHONTEX#py#default#default#5#c#####358#
+print(lines("int recTreeToStr"))
+=>PYTHONTEX#py#default#default#6#c#####370#
+print(lines("void simplify"))
+=>PYTHONTEX#py#default#default#7#c#####391#
+print(lines("long int gcd"))
+=>PYTHONTEX#py#default#default#8#c#####392#
+print(lines("long int lcm"))
+=>PYTHONTEX#py#default#default#9#c#####405#
+print(lines("int getLCM"))
+=>PYTHONTEX#py#default#default#10#c#####474#
+print(lines("void normalize"))
+=>PYTHONTEX#py#default#default#11#c#####480#
+print(lines("t_syntaxTree* minInf"))
+=>PYTHONTEX#py#default#default#12#c#####494#
+print(lines("int calcm"))
+=>PYTHONTEX#py#default#default#13#c#####505#
+print(lines("t_syntaxTree* boundaryPoints"))
+=>PYTHONTEX#py#default#default#14#c#####515#
+print(lines("t_syntaxTree* newFormula"))
+=>PYTHONTEX#py#default#default#15#c#####532#
+print(lines("void eval"))
+=>PYTHONTEX:SETTINGS#
+version=0.16
+outputdir=pythontex-files-elaborato
+workingdir=.
+workingdirset=false
+gobble=none
+rerun=default
+hashdependencies=default
+makestderr=false
+stderrfilename=full
+keeptemps=none
+pyfuture=default
+pyconfuture=none
+pygments=true
+pygglobal=:GLOBAL||
+fvextfile=-1
+pyconbanner=none
+pyconfilename=stdin
+depythontex=false
+pygfamily=py|python|
+pygfamily=pycon|pycon|
+pygfamily=sympy|python|
+pygfamily=sympycon|pycon|
+pygfamily=pylab|python|
+pygfamily=pylabcon|pycon|

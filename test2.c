@@ -13,11 +13,11 @@ int main(int argc, char** argv) {
       printf("%s\n", array[i]);
       free(array[i]);
     }
-
+    
     free(array);
   }
   else
     printf("Numero errato di argomenti!");
-  
+    
   return 0;
 }

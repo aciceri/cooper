@@ -11,9 +11,9 @@ def main():
         variables = argv[2].split()
         var = argv[3]
         yices = ""
-
-        for var in variables:
-            yices += "(define {}::int)\n".format(var)
+        
+        for v in variables:
+            if v is not var: yices += "(define {}::int)\n".format(v)
 
         wff_out = run(["./test", wff, var], capture_output=True).stdout.decode()
         yices += "(assert {})\n(check)".format(wff_out)

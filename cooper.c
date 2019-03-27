@@ -80,7 +80,7 @@ must have at least one child");
 	strcmp(tree->nodes[i]->nodeName, "div"))
       ERROR("Expression error: the children of the main 'and' \
 can only be '=', '>' or 'div'");
-     
+    
     if (tree->nodes[i]->nodesLen != 2)
       ERROR("Expression error: '=', '>', 'div' must have two children");
     if (strcmp(tree->nodes[i]->nodes[0]->nodeName, "+"))
@@ -106,7 +106,7 @@ be a number costant and the second must be a variable");
 }
 
 
-t_syntaxTree* parse(char* wff) {
+t_syntaxTree* parse(char* wff, int strict) {
   char* wffSpaced = malloc(sizeof(char));
   wffSpaced[0] = wff[0];
   int j = 1;
@@ -161,7 +161,7 @@ have a root and at least an argument");
   
   t_syntaxTree* syntaxTree = buildTree(0, tokens);
 
-  checkTree(syntaxTree); //chiama exit() se l'albero non va bene
+  if (strict) checkTree(syntaxTree); //chiama exit() se l'albero non va bene
   
   free(wffSpaced);
   free(tokens);
@@ -189,7 +189,7 @@ int getLCM(t_syntaxTree* tree, char* var) {
 
 void normalize(t_syntaxTree* tree, char* var) {
   int lcm = getLCM(tree, var);
-  int c;
+  int c = 1;
 
   for (int i=0; i<tree->nodesLen; i++) {
     if (strcmp("=", tree->nodes[i]->nodeName) == 0 ||
@@ -197,10 +197,11 @@ void normalize(t_syntaxTree* tree, char* var) {
       t_syntaxTree** addends = tree->nodes[i]->nodes[0]->nodes;
 
       for (int j=0; j<tree->nodes[i]->nodes[0]->nodesLen; j++) {
-	if (strcmp(addends[j]->nodes[1]->nodeName, var) == 0)
+	if (strcmp(addends[j]->nodes[1]->nodeName, var) == 0) 
 	  c = atoi(addends[j]->nodes[0]->nodeName);
       }
 
+      
       for (int j=0; j<tree->nodes[i]->nodes[0]->nodesLen; j++) {
 	if (strcmp(addends[j]->nodes[1]->nodeName, var) == 0) {
 	  strcpy(addends[j]->nodeName, var);
@@ -227,6 +228,7 @@ void normalize(t_syntaxTree* tree, char* var) {
 	if (strcmp(addends[j]->nodes[1]->nodeName, var) == 0)
 	  c = atoi(addends[j]->nodes[0]->nodeName);
       }
+
 
       for (int j=0; j<tree->nodes[i]->nodes[0]->nodesLen; j++) {
 	if (strcmp(addends[j]->nodes[1]->nodeName, var) == 0) {
@@ -583,22 +585,43 @@ char* treeToStr(t_syntaxTree* tree) {
   return str;
 }
 
+void adjustForYices(t_syntaxTree* t) {
+  for (int i=0; i<t->nodesLen; i++) {
+    if (strcmp(t->nodes[i]->nodeName, "div") == 0) {
+      t_syntaxTree* pt = t->nodes[i];
+      t->nodes[i] = malloc(sizeof(t_syntaxTree));
+      strcpy(t->nodes[i]->nodeName, "=");
+      t->nodes[i]->nodesLen = 2;
+      t->nodes[i]->nodes = malloc(sizeof(t_syntaxTree*) * 2);
+      t->nodes[i]->nodes[0] = pt;
+      t->nodes[i]->nodes[1] = malloc(sizeof(t_syntaxTree));
+      strcpy(t->nodes[i]->nodes[1]->nodeName, "0");
+      t->nodes[i]->nodes[1]->nodesLen = 0;
+      t->nodes[i]->nodes[1]->nodes = NULL;
+      continue;
+    }
+    adjustForYices(t->nodes[i]);
+  }
+}
+
 
 char* cooperToStr(char* wff, char* var) {
   t_syntaxTree* tree, *minf, *f;
   char* str;
 
-  tree = parse(wff); //Genera l'albero sintattico a partire dalla stringa
+  tree = parse(wff, 1); //Genera l'albero sintattico a partire dalla stringa
   normalize(tree, var); //Trasforma l'albero di tree
+  //printf("\nNormalizzato%s\n\n", treeToStr(tree));
   minf = minInf(tree, var); //Restituisce l'albero di $\varphi_{- \infty}$
   f = newFormula(tree, minf, var); //Restituisce la formula equivalente
   //simplify(f); //opzionale
+  adjustForYices(f);
   str = treeToStr(f); //Genera la stringa a partire dall'albero
   
   recFree(tree); //Libera la memoria
   recFree(minf);
   recFree(f);
-  
+
   return str;
 }
 
@@ -608,11 +631,11 @@ char** cooperToArray(char* wff, char* var, int* len) {
   char* buffer;
   char** array;
   
-  tree = parse(wff); //Genera l'albero sintattico a partire dalla stringa
+  tree = parse(wff, 1); //Genera l'albero sintattico a partire dalla stringa
   normalize(tree, var); //Trasforma l'albero di tree
   minf = minInf(tree, var); //Restituisce l'albero di $\varphi_{- \infty}$
   f = newFormula(tree, minf, var); //Restituisce la formula equivalente
-  //simplify(f); //opzionale
+  simplify(f); //opzionale
 
   *len = f->nodesLen;
 
@@ -632,16 +655,3 @@ char** cooperToArray(char* wff, char* var, int* len) {
   
   return array;
 }
-
-
-char* test(char* wff, char** vars, int varlen) {
-  int l;
-  char** fs = cooperToArray(wff, vars[0], &l);
-
-  for(int i=0; i<l; i++) {
-    
-  }
-
-  return "";
-}
-

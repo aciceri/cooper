@@ -2,10 +2,11 @@ SHELL := /bin/bash
 PARAMS = -std=c99 -Wall -g #compila nello standard C99 e abilita tutti i warning
 leak-check = yes #valgrind effettua una ricerca dei leak più accurata
 track-origins = yes #valgrind fornisce più informazioni
-wff = "(and (= (+ (* -2 x) (* 2 a) (* 3 b) (* 3 c)) 3) \
-	    (> (+ (* 5 x) (* 3 c)) 1) \
-            (div (+ (* 2 x) (* 2 y)) 1))" #formula in ingresso
-vars = "x y a b c" #variabili presenti nella formula
+wff = "(and (= (+ (* -2 x) (* 3 y)) 3) \
+	    (> (+ (* 5 x) (* 3 y)) 1) \
+            (div (+ (* 2 x) (* 4 y)) 1))" #formula in ingresso
+wff = "(and (div (+ (* 4 x) (* 3 y)) 2) (= (+ (* 2 x)) 4))"
+vars = "x y" #variabili presenti nella formula
 var = "x" #variabile da eliminare
 
 test: test.c cooper.o
@@ -28,7 +29,7 @@ run2: test2
 	@time ./test2 $(wff) $(var)
 
 run3: test3
-	@time ./test3 $(wff) $(vars)
+	time ./test3 $(wff) $(vars)
 
 sat: test sat.py #verifica la soddisfacibilità della formula generata grazie a yices
 	./sat.py $(wff) $(vars) $(var)
@@ -40,9 +41,9 @@ valgrind: test
 debug: test #esegue test col debugger gdb
 	gdb --args test $(wff) $(var)
 
-eval: test #valuta il valore della formula equivalente,
+eval: test3 #valuta il valore della formula equivalente,
 	   #funziona solo se ogni variabile è già stata eliminata
-	./eval.scm "`./test $(wff) $(var) | tail -n 1`"
+	./eval.scm "`./test3 $(wff) $(vars) | tail -n 1`"
 
 clean:
 	rm -f *.o
