@@ -225,15 +225,15 @@ void normalize(t_syntaxTree* tree, char* var) {
       t_syntaxTree** addends = tree->nodes[i]->nodes[0]->nodes;
 
       for (int j=0; j<tree->nodes[i]->nodes[0]->nodesLen; j++) {
-	if (strcmp(addends[j]->nodes[1]->nodeName, var) == 0)
-	  c = atoi(addends[j]->nodes[0]->nodeName);
+        if (strcmp(addends[j]->nodes[1]->nodeName, var) == 0) {
+          c = atoi(addends[j]->nodes[0]->nodeName); /*printf("\n\n%d %s %s\n\n", c, addends[j]->nodes[1]->nodeName, var)*/;}
       }
 
 
       for (int j=0; j<tree->nodes[i]->nodes[0]->nodesLen; j++) {
 	if (strcmp(addends[j]->nodes[1]->nodeName, var) == 0) {
-	  if(c > 0) strcpy(addends[j]->nodeName, "");
-	  else strcpy(addends[j]->nodeName, "-");
+	  /*if (c<0)*/ strcpy(addends[j]->nodeName, "");
+	  //else strcpy(addends[j]->nodeName, "-");
 	  strcat(addends[j]->nodeName, var);
 	  free(addends[j]->nodes[0]);
 	  free(addends[j]->nodes[1]);

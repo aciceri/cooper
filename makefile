@@ -6,7 +6,8 @@ wff = "(and (= (+ (* -2 x) (* 3 y)) 3) \
 	    (> (+ (* 5 x) (* 3 y)) 1) \
             (div (+ (* 2 x) (* 4 y)) 1))" #formula in ingresso
 wff = "(and (div (+ (* 3 z)) 3) (= (+ (* 2 y) (* 3 x)) 2) (= (+ (* 2 x)) 4))"
-vars = "x y z" #variabili presenti nella formula
+wff= "(and (> (+ (* 1 x)) 5) (> (+ (* -1 x) (* 1 y)) 0))"
+vars = "x y" #variabili presenti nella formula
 var = "x" #variabile da eliminare
 
 test: test.c cooper.o
