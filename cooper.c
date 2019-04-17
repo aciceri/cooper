@@ -201,7 +201,7 @@ void normalize(t_syntaxTree* tree, char* var) {
 	  c = atoi(addends[j]->nodes[0]->nodeName);
       }
 
-      
+
       for (int j=0; j<tree->nodes[i]->nodes[0]->nodesLen; j++) {
 	if (strcmp(addends[j]->nodes[1]->nodeName, var) == 0) {
 	  strcpy(addends[j]->nodeName, var);
@@ -215,7 +215,7 @@ void normalize(t_syntaxTree* tree, char* var) {
 		  atoi(addends[j]->nodes[0]->nodeName)*lcm/c);
 	}
       }
-
+      //printf("\n\n%d %s\n\n", lcm/c, tree->nodes[i]->nodes[1]->nodeName);
       sprintf(tree->nodes[i]->nodes[1]->nodeName,
 	      "%d",
 	      atoi(tree->nodes[i]->nodes[1]->nodeName)*lcm/c);
@@ -232,8 +232,8 @@ void normalize(t_syntaxTree* tree, char* var) {
 
       for (int j=0; j<tree->nodes[i]->nodes[0]->nodesLen; j++) {
 	if (strcmp(addends[j]->nodes[1]->nodeName, var) == 0) {
-	  /*if (c<0)*/ strcpy(addends[j]->nodeName, "");
-	  //else strcpy(addends[j]->nodeName, "-");
+	  if (c>0) strcpy(addends[j]->nodeName, "");
+	  else strcpy(addends[j]->nodeName, "-");
 	  strcat(addends[j]->nodeName, var);
 	  free(addends[j]->nodes[0]);
 	  free(addends[j]->nodes[1]);
@@ -242,7 +242,7 @@ void normalize(t_syntaxTree* tree, char* var) {
 	else {
 	  sprintf(addends[j]->nodes[0]->nodeName,
 		  "%d",
-		  atoi(addends[j]->nodes[0]->nodeName)*lcm/abs(c));
+            atoi(addends[j]->nodes[0]->nodeName)*abs(lcm/c));
 	}
       }
 
@@ -346,8 +346,21 @@ void eval(t_syntaxTree* tree, char* var, t_syntaxTree* val) {
       recFree(tree->nodes[i]);
       tree->nodes[i] = recCopy(val);
     }
-    else
-      eval(tree->nodes[i], var, val);
+    else {
+      char mvar[17] = "-";
+      strcat(mvar, var);
+      if (strcmp(tree->nodes[i]->nodeName, mvar) == 0) {
+        recFree(tree->nodes[i]);
+
+        tree->nodes[i] = malloc(sizeof(t_syntaxTree));
+        strcpy(tree->nodes[i]->nodeName, "-");
+        tree->nodes[i]->nodesLen = 1;
+        tree->nodes[i]->nodes = malloc(sizeof(t_syntaxTree*));
+        tree->nodes[i]->nodes[0] = recCopy(val);
+      }
+    }
+   
+    eval(tree->nodes[i], var, val);
   }
 }
 
@@ -381,7 +394,7 @@ t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) {
   str[0] = '\0';
   t_syntaxTree* bPoints = malloc(sizeof(t_syntaxTree));
   bPoints->nodes = NULL;
-  strcpy(bPoints->nodeName, "bPoints"); //solo per debugging
+  strcpy(bPoints->nodeName, "bPoints"); //nome solo per debugging
   bPoints->nodesLen = 0;
 
   for(int i=0; i<tree->nodesLen; i++) {
@@ -402,6 +415,7 @@ t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) {
 	      bp->nodesLen++;
 	      bp->nodes = realloc(bp->nodes, sizeof(t_syntaxTree*) * bp->nodesLen);
 	      bp->nodes[bp->nodesLen-1] = recCopy(addends[k]);
+
 	      sprintf(str, "%d", -atoi(bp->nodes[bp->nodesLen-1]->nodes[0]->nodeName));
 	      strcpy(bp->nodes[bp->nodesLen-1]->nodes[0]->nodeName, str);
 	    }
@@ -412,7 +426,7 @@ t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) {
 	  bp->nodes[bp->nodesLen-1] = malloc(sizeof(t_syntaxTree));
 	  bp->nodes[bp->nodesLen - 1]->nodesLen = 0;
 	  bp->nodes[bp->nodesLen - 1]->nodes = NULL;
-	  sprintf(str, "%d", -1+atoi(tree->nodes[i]->nodes[1]->nodeName));
+	  sprintf(str, "%d", 1+atoi(tree->nodes[i]->nodes[1]->nodeName));
 	  strcpy(bp->nodes[bp->nodesLen - 1]->nodeName, str);
 
 	  bPoints->nodes[bPoints->nodesLen-1] = bp;
@@ -612,18 +626,21 @@ char* cooperToStr(char* wff, char* var) {
 
   tree = parse(wff, 1); //Genera l'albero sintattico a partire dalla stringa
   normalize(tree, var); //Trasforma l'albero di tree
-  //printf("\nNormalizzato%s\n\n", treeToStr(tree));
+  printf("\nNormalizzato %s\n\n", treeToStr(tree));
   minf = minInf(tree, var); //Restituisce l'albero di $\varphi_{- \infty}$
+  printf("\nMininf %s\n\n", treeToStr(minf));
+  printf("\nbPts %s\n\n", treeToStr(boundaryPoints(tree, var)));
   f = newFormula(tree, minf, var); //Restituisce la formula equivalente
   simplify(f); //opzionale
   adjustForYices(f);
   str = treeToStr(f); //Genera la stringa a partire dall'albero
-  
+
   recFree(tree); //Libera la memoria
   recFree(minf);
   recFree(f);
 
-  return str;
+  //return "ciao";
+  //return str;
 }
 
 
