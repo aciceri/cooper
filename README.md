@@ -14,7 +14,7 @@ però sono necessari i seguenti:
 
 * `gdb` per il debugging
 * `guile` per valutare le espressioni generate dal programma
-* `python` (**versione 3**) per generare il sorgente che viene eseguito da `yices`
+* `python` (**versione 3**) per generare il sorgente che viene eseguito da `z3`
 * `z3` per verificare la correttezza delle espressioni generate dal programma
 * `valgrind` per appurare la mancanza di memory leaks
 
