@@ -27,7 +27,7 @@ variabile da eliminare impostate nel `makefile`
 * `make debug` esegue il programma con `gdb` con gli stessi input di `make run`
 * `make eq formula="#" variables="#" guess="#"` esegue il programma passando `formula` e
 e la prima variabile in `variables` e verifica tramite `z3` se l'output del programma è
-equivalente a `guess` (***attenzione:** il processo potrebbe non arrestarsi mai**).
+equivalente a `guess` (***attenzione:** il processo potrebbe non arrestarsi mai).
 sorgente per `yices` contenenta la formula equivale
 tale sorgente con `yices` verifcandone la soddisfacibilità.
 * `make eval` esegue il programma con gli stessi input di `make run` e cerca di
