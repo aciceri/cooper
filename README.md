@@ -15,8 +15,7 @@ però sono necessari i seguenti:
 * `gdb` per il debugging
 * `guile` per valutare le espressioni generate dal programma
 * `python` (**versione 3**) per generare il sorgente che viene eseguito da `yices`
-* `yices` (**versione 1**) per verificare la soddisfacibilità delle espressioni
-* generate dal programma
+* `z3` per verificare la correttezza delle espressioni generate dal programma
 * `valgrind` per appurare la mancanza di memory leaks
 
 
@@ -26,8 +25,10 @@ Sono disponibili i seguenti comandi:
 variabile da eliminare impostate nel `makefile`
 * `make valgrind` esegue il programma con `valgrind` con gli stessi input di `make run`
 * `make debug` esegue il programma con `gdb` con gli stessi input di `make run`
-* `make sat` esegue il programma con gli stessi input di `make run` e genera un
-sorgente per `yices` contenenta la formula equivalente, successivamente esegue
+* `make eq formula="#" variables="#" guess="#"` esegue il programma passando `formula` e
+e la prima variabile in `variables` e verifica tramite `z3` se l'output del programma è
+equivalente a `guess` (***attenzione:** il processo potrebbe non arrestarsi mai**).
+sorgente per `yices` contenenta la formula equivale
 tale sorgente con `yices` verifcandone la soddisfacibilità.
 * `make eval` esegue il programma con gli stessi input di `make run` e cerca di
 valutare la formula equivalente, ovviamente ciò funziona solo se la formula

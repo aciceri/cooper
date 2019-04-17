@@ -12,6 +12,7 @@ doc/auto/*
 *.hs
 _minted*
 *.ys
+*.smt
 *.toc
 *.bbl
 *.blg
