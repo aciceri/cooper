@@ -49,4 +49,4 @@ eval: test3 #valuta il valore della formula equivalente,
 clean:
 	rm -f *.o
 	rm -f test test2
-	rm -f eq.py
+	rm -f eq.smt
