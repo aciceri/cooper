@@ -2,45 +2,47 @@
 #include <string.h>
 #include <stdio.h>
 
-#define ERROR(msg) {printf(msg); printf("\n"); exit(EXIT_FAILURE);}
+#define ERROR(msg) {printf(msg); printf("\n"); exit(EXIT_FAILURE);}             
 
 
-long int gcd(long int a, long int b) {
+typedef struct t_syntaxTree { //Per rappresentare gli alberi sintattici
+  char nodeName[16]; //Lunghezza massima scelta arbitrariamente
+  int nodesLen; //Numero di figli dell'albero
+  struct t_syntaxTree** nodes; //Puntatore 
+} t_syntaxTree;
+
+long int gcd(long int a, long int b) { //Massimo comun divisore 
   return b == 0 ? a : gcd(b, a % b);
 }
 
 
-long int lcm(long int a, long int b) {
+long int lcm(long int a, long int b) { //Minimo comune multiplo 
   return abs((a / gcd(a, b)) * b);
 }
 
 
-typedef struct t_syntaxTree {
-  char nodeName[16];
-  int nodesLen;
-  struct t_syntaxTree** nodes;
-} t_syntaxTree;
-
-
-t_syntaxTree* buildTree(int first, char** tokens) {
+t_syntaxTree* buildTree(int first, char** tokens) { //first è l'indice del
+                                                    //token attualmente
+                                                    //considerato 
   t_syntaxTree* tree = malloc(sizeof(t_syntaxTree));
   tree->nodes = NULL;
-  int open;
+  int open; //Numero di parentesi aperte incontrate finora
 
   if (tokens[first][0] == '(') {
-    if (tokens[first + 1][0] == ')')
+    if (tokens[first + 1][0] == ')') //Non mi aspetto cose del tipo "()"
       ERROR("Parsing error: empty S-expression '()'");
-    if (tokens[first + 1][0] == '(')
+    if (tokens[first + 1][0] == '(') //Nemmeno del tipo "(() blah blah)"
       ERROR("Parsing error: the root of an S-expression can't \
 be another non-banal S-expression, e.g. '(())' is not ok");
 
-    first++;
-    tree->nodesLen = 0;
-    strcpy(tree->nodeName, tokens[first]);
-    open = 1;
+    first++; //Passo al token successivo (che in realtà è già stato consumato)
+    tree->nodesLen = 0; //Il nodo attuale potrebbe non avere figli
+    strcpy(tree->nodeName, tokens[first]); //Il nome del nodo è il primo token
+    open = 1; //Per ora abbiamo incontrato una parentesi aperta i.e. siamo al
+              //primo livello di annidamento 
 
-    do {
-      first++;
+    do { 
+      first++; //Passo al token successivo
 
       if (open == 1 && tokens[first][0] != ')') {
 	tree->nodesLen++;
