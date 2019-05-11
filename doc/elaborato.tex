@@ -261,7 +261,7 @@ potrebbe essere semplicemente sostituito con $\lnot \, \exists \, x \, \lnot$.
 \item Si eliminano le negazioni logiche portando i $\lnot$ il più lontano
   possibile dagli atomi (per esempio usando le leggi di De Morgan) e
   successivamente si sostituiscono i letterali che consistono di atomi negati con
-  atomi equivalenti non negati. (e.g. sostituire $\lnot (x \leq a)$ con $x = a$)
+  atomi equivalenti non negati. (e.g. sostituire $\lnot (x \leq a)$ con $x > a$)
   A questo punto si sostituiscono tutte le formule che contengono altri simboli
   relazionali che non siano $<$, $\mid$ or $\nmid$ in formule equivalenti
   contenenti solo $<$.
@@ -476,7 +476,7 @@ l'insieme dei boundary points.
 
 Infine \inline{t_syntaxTree* newFormula(t_syntaxTree* tree, t_syntaxTree* minf,
 char* var)} genera la formula equivalente a partire da $\varphi '_{- \infty}$ e
-della formula normalizzata. \`E al suo interno che viene effettuata la chiamata
+dalla formula normalizzata. \`E al suo interno che viene effettuata la chiamata
 a \inline{boundaryPoints}.
 
 Esiste inoltre un ulteriore passo opzionale non facente parte dell'algoritmo di
@@ -582,7 +582,7 @@ Si ritorni ora a considerare i passi principali dell'algoritmo, così come sono
 esposti nella funzione \inline{cooper}, dopo quanto detto finora rimane da
 considerare l'implementazione effettiva dell'algoritmo.
 
-\src{525}{530} %passi fondamentali di cooper
+\src{682}{686} %passi fondamentali di cooper
 
 Ovvero rimangono da discutere le funzioni \inline{normalize}, \inline{minInf} e
 \inline{newFormula}. Si adempia subito all'incombenza data dalla funzione
@@ -605,7 +605,7 @@ accorciare le espressioni generate dall'algoritmo e una ulteriore complessità
 aggiunta. Si noti infine come ancora una volta occorre prestare attenzione alla
 corretta deallocazione della memoria.
 
-\`E giunto infine il momento di analizzare la funzione \inline{normalize}, tale
+\`E giunto il momento di analizzare la funzione \inline{normalize}, tale
 funzione si appoggia a sua volta alle funzione \inline{getLCM} che a sua volta
 richiama \inline{gcd} e \inline{lcm}.
 
@@ -636,7 +636,7 @@ particolare potrebbe anche essere evitata, ma lo stesso non si potrà dire in
 seguito, pertanto verrà assunto un tale input.
 
 Risulta quindi ora utile discutere quale sia la forma esatta dell'input gestito
-dal programma, molte assunzioni che portano a perdita di generalità sono state
+dal programma, molte assunzioni che non portano a perdita di generalità sono state
 fatte, la maggior parte delle quali non evitabili a meno di dover scrivere molte
 funzioni ausiliarie di semplificazione. Si è scelta tale strada principalmente
 per due motivi:
@@ -650,7 +650,7 @@ dall'utilizzo del C senza nessuna libreria di supporto.
 funzionalità al software MCMT\autocite{mcmt}, scrivere una libreria di supporto
 per poter gestire più input avrebbe comportato la riscrittura di molto codice
 già presente in MCMT. Allo stesso tempo interfacciarsi al software preesistente
-avrebbe reso vincolato troppo il progetto, si è preferito un approccio
+avrebbe vincolato troppo il progetto, si è preferito un approccio
 intermedio in modo da poter comunque rendere questo software il più stand-alone
 possibile.
 \end{itemize}
@@ -726,7 +726,7 @@ facilita semplicemente il debugging.
 boundaryPoints}
 
 Si discuta ora la funzione che restituisce la formula equivalente che poi
-\inline{cooper} ritorna, tale funzione è \inline{t_syntaxTree*
+\inline{cooperToStr} ritorna, tale funzione è \inline{t_syntaxTree*
 newFormula(t_syntaxTree* tree, t_syntaxTree* minf, char* var)}, essa non è altro
 che l'applicazione dell'equivalenza già esposta più volte. Prende in ingresso le
 forumule $\varphi'$ e $\varphi'_{-\infty}$ e la variabile da eliminare, è al suo
@@ -744,7 +744,7 @@ prende ingresso un albero, una variabile e un valore e va a sostituire il valore
 alla variabile.
 
 Trattasi ovviamente della funzione \inline{void eval(t_syntaxTree* tree, char*
-var, t_syntaxTree* val)}, si osservi anche qui come ovviamente tale funzione
+var, t_syntaxTree* val)}, si osservi anche qui come tale funzione
 potrebbe essere resa più sofisticata aggiungendo una effettiva valutazione delle
 operazioni aritmetiche o logiche, ma come prima anche questo avrebbe aggiunto
 una ulteriore complessità al progetto, pertanto si è scelto di non proseguire in
@@ -757,66 +757,96 @@ questa strada.
 
 In questa sezione verranno forniti alcuni semplici esempi di utilizzo,
 innanzitutto si sottolinea come l'implementazione dell'algoritmo termini con la
-funzione \inline{cooper}, tutto quello che sta per essere esposto è al solo
+funzione \inline{cooperToStr}, tutto quello che sta per essere esposto è al solo
 scopo di fornire una interfaccia che permetta di verificare il corretto
 funzionamento dell'algoritmo.
 
-\subsection{Il programma \inline{test.c}} Si consideri il seguente programma di
-esempio contenuto in \inline{test.c}:
+\subsection{Programmi di esempio}
+Sono forniti assieme alla presente due programmi di esempio, il primo è
+\inline{test.c}
 
 \inputminted[linenos, mathescape=true]{C}{../test.c}
 
-Si consideri ora il seguente \inline{makefile}:
+Il secondo programma di esempio è \inline{test2.c}
+
+\inputminted[linenos, mathescape=true]{C}{../test2.c}
+
+Come si può notare tale programma si appoggia alla funzione \inline{cooperToArray},
+gemella di \inline{cooper}.
+
+\srcf{char** cooperToArray}
 
 \subsection{Il Makefile} \inputminted[linenos]{makefile}{../makefile}
-
-\'E semplice immaginare cosa facciano le regole \inline{run}, \inline{valgrind},
+Si consideri ora il seguente \inline{makefile}:
+\'E semplice immaginare cosa facciano le regole \inline{run}, \inline{run2}, \inline{valgrind},
 \inline{debug} e \inline{clean}. Ci si soffermi ora su \inline{eval} e
-\inline{sat}. La prima esegue semplicemente \inline{test} con la formula in
+\inline{eq}. La prima esegue semplicemente \inline{test} con la formula in
 ingresso specificata nel \inline{makefile} e cerca di valutare la formula
 equivalente generata tramite il seguente script in Guile Scheme\autocite{guile}.
 
-\subsection{Valutazione e soddisfacibilità}
+\subsection{Valutazione ed equivalenza}
 \inputminted[linenos]{scheme}{../eval.scm}
 
 Tale script valuta semplicemente la formula equivalente, è stato scelto un
-linguaggio della famiglia Lisp in quanto utilizza condivida la stessa sintassi
-di SMT-LIB e ciò rende la valutazione della formula una semplice chiamata alla
+linguaggio della famiglia Lisp in quanto condivide la sintassi con
+SMT-LIB e ciò rende la valutazione della formula una semplice chiamata alla
 funzione \inline{eval-string}.
 
 Si ricorda come ovviamente tale procedura non è un verifica della
 soddisfacibilità, cioè qualora fossero ancora presenti variabili nella formula
 equivalente allora tale script produrrebbe un errore. Per una verifica della
-soddsfacibilità si usi invece la regola \inline{sat} del \inline{makefile}.
+soddsfacibilità si usi invece la regola \inline{eq} del \inline{makefile}.
 Tale regola esegue il seguente script Python\autocite{python}.
 
-\inputminted[linenos]{python}{../sat.py}
+\inputminted[linenos]{python}{../eq.py}
 
-Tale script genera un opportuno sorgente \inline{source.ys} per
-Yices\autocite{yices} e successivamente lo esegue, per esempio se la regola
-\inline{make sat} esegue \inline{./sat.py "(and (> (+ (* 2 x) (* 3 y)) 1))" "x
-y" "x"} allora viene generato il seguente \inline{source.ys} che viene poi
-eseguito da Yices che restituisce la stringa \inline{"sat"}.
+Tale script genera un opportuno sorgente per
+z3\autocite{yices} e successivamente lo esegue (poi lo elimina), per esempio eseguendo
 
-\begin{minted}{scheme}
-  (define x::int)
-  (define y::int)
-  (assert (or (and false (div 1 3))
-              (and (> (+ (* 2 x) (+ (* -2 x) 2)) 1) (div (+ (* -2 x) 2) 3))
-              (and false (div 2 3))
-              (and (> (+ (* 2 x) (+ (* -2 x) 3)) 1) (div (+ (* -2 x) 3) 3))
-              (and false (div 3 3))
-              (and (> (+ (* 2 x) (+ (* -2 x) 4)) 1) (div (+ (* -2 x) 4) 3))))
-  (check)
+\begin{minted}{bash}
+  make eq formula="(and (> (+ (* 1 x)) 5) (> (+ (* -1 x) (* 1 y)) 0))"
+          variables="x y" guess="(> y 6)"
 \end{minted}
 
-Ovvero l'algoritmo trasforma correttamente una formula soddisfacibile (non è
-difficile trovare dei valori di $x$ e $y$ che soddisfino la formula iniziale) in
-una formula senza la variabile $x$ che a sua volta \inline{Yices} dice essere
-ancora soddisfacibile. Questo genere di verifiche ovviamente non garantiscono la
-corretta implementazione, ciononostante permettono di guadagnare una certa
-fiducia nella stessa.
+viene generato, eseguito con z3 e infine eliminato il seguente programma:
 
+\begin{minted}{scheme}
+  (declare-const y Int)
+  (assert (not (= (or false (and (> (+ (+ 6)) 5) (> (+ (- (+ 6)) (* 1 y)) 0)
+                      (= (mod (+ 6) 1) 0))) (> y 6))))
+  (check-sat)
+\end{minted}
+
+A questo punto lo script Python valuta ciò che z3 restituisce e stampa se le formule
+sono equivalenti o meno.
+
+\subsection{Esempi}
+Si mostri ora un semplice esempio di utilizzo di \inline{make eq} con l'obiettivo
+di verificare il corretto comportamento del programma.
+Per esempio si vuole eliminare la variabile $x$ dalla seguente formula:
+
+$$ x > 5 \land y < x $$
+
+\'E immediato osservare che tale formula è equivalente a $y > 6$, pertanto il eseguiamo
+il comando
+\begin{minted}{bash}
+  make eq formula="(and (> (+ (* 1 x)) 5) (> (+ (* -1 x) (* 1 y)) 0))"
+          variables="x y" guess="(> y 6)"
+\end{minted}
+Ovvero verifichiamo se quanto produce l'algoritmo di Cooper sia equivalente o meno a $y > 6$.
+Otteniamo come voluto "Sono equivalenti".
+Si ribadisce come la forma dell'input che si aspetta tale comando debba rispettare quanto
+detto precedentemente, ovvero:
+
+\begin{itemize}
+\item la radice della formula deve essere un \inline{and}
+\item i figli della radice possono essere esclusivamente \inline{>}, \inline{=} o \inline{div}
+\item ognuno di questi deve avere esattamente 2 figli: il primo deve essere un \inline{+} e
+  il secondo un numero (eventualmente con segno negativo)
+\item i figli di \inline{+} possono essere solamente \inline{*} e ognuno di questi deve avere
+  esattamente due figli: il primo un numero (eventualmente con segno negativo) e il secondo una
+  variabile (lunga massimo 16 caratteri).
+\end{itemize}
 
 \newpage
 \tableofcontents
