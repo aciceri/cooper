@@ -1,6 +1,6 @@
 #!/bin/python3
 from sys import argv
-from subprocess import run
+from subprocess import run, PIPE
 
 
 def main():
@@ -17,15 +17,14 @@ def main():
             if v is not var:
                 smt_source += "(declare-const {} Int)\n".format(v)
 
-        wff_out = run(["./test", formula, var],
-                      capture_output=True).stdout.decode()
+        wff_out = run(["./test", formula, var], stdout=PIPE).stdout.decode()
         smt_source += "(assert (not (= {} {})))\n".format(wff_out, guess)
         smt_source += "(check-sat)\n"
 
         with open("eq.smt", "w") as source:
             print(smt_source, file=source)
 
-        result = run(["z3", "eq.smt"], capture_output=True).stdout.decode()
+        result = run(["z3", "eq.smt"], stdout=PIPE).stdout.decode()
 
         if "unsat" in result:
             print("Sono equivalenti")

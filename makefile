@@ -29,7 +29,7 @@ run2: test2
 	@time ./test2 $(wff) $(var)
 
 eq: test eq.py #prende la formula e la variabile da eliminare, la elimina controlla con z3 se il risultato è equivalente a $(guess)
-	@./eq.py "$(formula)" "$(variables)" "$(guess)" #la prima in variables è quella da eliminare
+	@python3 eq.py "$(formula)" "$(variables)" "$(guess)" #la prima in variables è quella da eliminare
 
 valgrind: test
 	valgrind --track-origins=$(track-origins) \
