@@ -21,10 +21,12 @@ def main():
         smt_source += "(assert (not (= {} {})))\n".format(wff_out, guess)
         smt_source += "(check-sat)\n"
 
-        with open("eq.smt", "w") as source:
+        with open("eq.smt2", "w") as source:
             print(smt_source, file=source)
 
-        result = run(["z3", "eq.smt"], stdout=PIPE).stdout.decode()
+        print("Eseguo con z3 il file 'eq.smt2' contenente: \n{}".format(smt_source))
+
+        result = run(["z3", "eq.smt2"], stdout=PIPE).stdout.decode()
 
         if "unsat" in result:
             print("Sono equivalenti")
