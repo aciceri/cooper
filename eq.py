@@ -24,6 +24,7 @@ def main():
         with open("eq.smt2", "w") as source:
             print(smt_source, file=source)
 
+        print("Verifico se {} e' equivalente a \n{}".format(guess, wff_out))
         print("Eseguo con z3 il file 'eq.smt2' contenente: \n{}".format(smt_source))
 
         result = run(["z3", "eq.smt2"], stdout=PIPE).stdout.decode()
