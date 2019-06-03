@@ -102,7 +102,7 @@ must be a number constant");
       if (tree->nodes[i]->nodes[0]->nodes[j]->nodesLen != 2)
         ERROR("Expression error: '*' must have two children");
       if (!isNumber(tree->nodes[i]->nodes[0]->nodes[j]->nodes[0]->nodeName) +
-          isNumber(tree->nodes[i]->nodes[0]->nodes[j]->nodes[1]->nodeName))
+          isNumber(tree->nodes[i]->nodes[0]->nodes[j]->nodes[1]->nodeName) && j!=0)
         ERROR("Expression error: the first child of '*' must \
 be a number costant and the second must be a variable");
     }
