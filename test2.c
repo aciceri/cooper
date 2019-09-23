@@ -17,7 +17,7 @@ int main(int argc, char** argv) {
     free(array);
   }
   else
-    printf("Numero errato di argomenti!");
+    printf("Numero errato di argomenti!\n");
     
   return 0;
 }

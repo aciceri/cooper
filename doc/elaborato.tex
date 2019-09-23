@@ -821,22 +821,26 @@ A questo punto lo script Python valuta ciò che z3 restituisce e stampa se le fo
 sono equivalenti o meno.
 
 \subsection{Esempi}
-Si mostri ora un semplice esempio di utilizzo di \inline{make eq} con l'obiettivo
-di verificare il corretto comportamento del programma.
-Per esempio si vuole eliminare la variabile $x$ dalla seguente formula:
+Vengono mostrati ora alcuni esempi di utilizzo della libreriatramite il comando
+\inline{make eq}.
+\subsubsection{Esempio 1}
+Si voglia eliminare la variabile $x$ dalla seguente formula:
 
 $$ x > 5 \land y < x $$
-
-\'E immediato osservare che tale formula è equivalente a $y > 6$, pertanto il eseguiamo
-il comando
+\'E immediato osservare che tale formula è equivalente a $y > 6$, pertanto
+eseguiamo il comando
 \begin{minted}{bash}
   make eq formula="(and (> (+ (* 1 x)) 5) (> (+ (* -1 x) (* 1 y)) 0))"
           variables="x y" guess="(> y 6)"
 \end{minted}
-Ovvero verifichiamo se quanto produce l'algoritmo di Cooper sia equivalente o meno a $y > 6$.
-Otteniamo come voluto "Sono equivalenti".
-Si ribadisce come la forma dell'input che si aspetta tale comando debba rispettare quanto
-detto precedentemente, ovvero:
+Ovvero verifichiamo se quanto produce l'algoritmo di Cooper sia equivalente o
+meno a $y > 6$ (passato a \inline{make eq} come parametro \inline{guess}).
+Si ricorda che i nomi delle variabili contenute in \inline{formula} vanno
+passate a \inline{make eq} come parametro \inline{variables} e che la prima
+di esse \'e quella che viene eliminata.
+Eseguendo questo comando otteniamo come voluto "Sono equivalenti".
+Si ribadisce come la forma di \inline{formula} che si aspetta il programma debba
+rispettare quanto detto precedentemente, ovvero:
 
 \begin{itemize}
 \item la radice della formula deve essere un \inline{and}
@@ -846,7 +850,41 @@ detto precedentemente, ovvero:
 \item i figli di \inline{+} possono essere solamente \inline{*} e ognuno di questi deve avere
   esattamente due figli: il primo un numero (eventualmente con segno negativo) e il secondo una
   variabile (lunga massimo 16 caratteri).
+\item \'e possibile avere anche figli di \inline{+} che siano \inline{*} con
+  entrambi i figli costanti, in tal caso per\'o il primo figlio deve essere
+  necessariamente \inline{1} o {-1}. Questo si rivela fondamentale per inserire
+  costanti nelle formule con \inline{div}
 \end{itemize}
+
+\subsubsection{Esempio 2}
+\'E anche possibile verificare direttamente la verit\'a delle formule
+confrontando se esse sono equivalenti a \inline{true} e \inline{false}.
+Si voglia controllare se la seguente formula \'e vera:
+
+$$ x = 2k \land x \equiv_2 1 $$
+Tale formula, palesemente falsa, pu\'o essere verificata con il comando
+
+\begin{minted}{bash}
+  make eq formula="(and (= (+ (* 1 x) (* -2 k)) 0) (div (+ (* 1 1) (* 1 x)) 2))"
+          variables="x k" guess="true"
+\end{minted}
+
+Ossia si controlla se la formula \'e equivalente a \inline{true}, che essendo
+falso, fa si che venga stampato che le formule non sono equivalenti.
+
+\subsubsection{Esempio 3}
+Analogamente al precedente esempio si verifica che invece la seguente formula
+\'e vera
+
+$$ x = 2k + 1 \land x \equiv_2 1 $$
+Il comando
+\begin{minted}{bash}
+  make eq formula="(and (= (+ (* 1 x) (* -2 k)) 1) (div (+ (* 1 1) (* 1 x)) 2))"
+          variables="x k" guess="true"
+\end{minted}
+restituisce "Non sono equivalenti".
+Si osservi per in questi ultimi due esempi si potrebbe scambiare l'ordine delle
+variabili $x$ e $k$ in \inline{variables}, ovvero eliminare $k$ invece di $x$.
 
 \newpage
 \tableofcontents

@@ -1,5 +1,5 @@
 SHELL := /bin/bash
-PARAMS = -std=c99 -Wall -g #compila nello standard C99 e abilita tutti i warning
+PARAMS = -std=c99 -O3 -Wall -g #compila nello standard C99 e abilita tutti i warning
 leak-check = yes #valgrind effettua una ricerca dei leak più accurata
 track-origins = yes #valgrind fornisce più informazioni
 wff = "(and (= (+ (* -2 x) (* 3 y)) 3) \
