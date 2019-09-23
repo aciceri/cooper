@@ -840,7 +840,7 @@ passate a \inline{make eq} come parametro \inline{variables} e che la prima
 di esse \'e quella che viene eliminata.
 Eseguendo questo comando otteniamo come voluto "Sono equivalenti".
 Si ribadisce come la forma di \inline{formula} che si aspetta il programma debba
-rispettare quanto detto precedentemente, ovvero:
+rispettare quanto detto nei capitoli precedenti, ovvero:
 
 \begin{itemize}
 \item la radice della formula deve essere un \inline{and}
@@ -852,7 +852,7 @@ rispettare quanto detto precedentemente, ovvero:
   variabile (lunga massimo 16 caratteri).
 \item \'e possibile avere anche figli di \inline{+} che siano \inline{*} con
   entrambi i figli costanti, in tal caso per\'o il primo figlio deve essere
-  necessariamente \inline{1} o {-1}. Questo si rivela fondamentale per inserire
+  necessariamente \inline{1} o \inline{-1}. Questo si rivela fondamentale per inserire
   costanti nelle formule con \inline{div}
 \end{itemize}
 
@@ -880,10 +880,10 @@ $$ x = 2k + 1 \land x \equiv_2 1 $$
 Il comando
 \begin{minted}{bash}
   make eq formula="(and (= (+ (* 1 x) (* -2 k)) 1) (div (+ (* 1 1) (* 1 x)) 2))"
-          variables="x k" guess="true"
+          2variables="x k" guess="true"
 \end{minted}
 restituisce "Non sono equivalenti".
-Si osservi per in questi ultimi due esempi si potrebbe scambiare l'ordine delle
+Si osservi come in questi ultimi due esempi si sarebbe potuto scambiare l'ordine delle
 variabili $x$ e $k$ in \inline{variables}, ovvero eliminare $k$ invece di $x$.
 
 \newpage
