@@ -134,8 +134,8 @@ effettuare i seguenti passi:
   \item Per le equazioni e le equazioni negate, rispettivamente nella forma
 $0=t$ e $\lnot (0=t)$, si moltiplica $t$ per $l/c$, dove $c$ indica il
 coefficiente della $x$.
-  \item Analogamente, per i predicati di divisibilit\`a $D_k(t)$ e i predicati
-di divisibilt\`a negati $\lnot D_k(t)$ si moltiplica sia $t$ che $k$ per $l/c$,
+  \item Analogamente, per i predicati di divisibilit\`a $k \mid t$ e i predicati
+di divisibilt\`a negati $k \nmid t$ si moltiplica sia $t$ che $k$ per $l/c$,
 sempre dove $c$ indica il coefficiente della $x$.
   \item Per le diseguaglianze $0<t$ si moltiplica $t$ per il valore assoluto
 $l/c$, dove ancora un volta $c$ indica il coefficiente della $x$.
@@ -146,7 +146,7 @@ ora a considerare la seguente formula equivalente:
 
 $$ \exists \, x . \, (D_l(x) \land \psi)  $$
 2dove $\psi$ è ottenuta da $\varphi$\ sostituendo $l \cdot x$ con $x$.  Dunque la
-formula $\varphi' = D_l(x) \land \psi$ è una formula ristretta dove i
+formula $\varphi' = l \mid x \land \psi$ è una formula ristretta dove i
 coefficienti della $x$ sono $\pm 1$.
 
 \subsection{Costruzione di $\varphi'_{- \infty}$} Definiamo una nuova formula
@@ -188,7 +188,7 @@ $$ \exists \, x \, . \, \varphi'[x] \longleftrightarrow \bigvee_{j=1}^m \Big(
 \varphi'_{- \infty}[j] \lor \bigvee_{b \in B}(\varphi'[b+j]) \Big)$$ dove
 $\varphi'$ è la formula ristretta in cui i coefficienti della $x$ sono sempre
 $\pm 1$, $m$ è il minimo comune multiplo di tutti i $k$ dei predicati di
-divisbilit\`a $D_k(t)$ che appaiono in $\varphi'$ tali che appaia la $x$ in $t$
+divisbilit\`a $d \mid t$ che appaiono in $\varphi'$ tali che appaia la $x$ in $t$
 e infine $B$ \`e il $B$-set relativo a $\varphi'$.  Considerando quindi il lato
 destro della precedente equivalenza si ha una formula priva del quantificatore
 esistenziale e si ha dunque ottenuto ciò che si voleva.
