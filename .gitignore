@@ -7,7 +7,6 @@ test2
 #*#
 .#*
 doc/auto/*
-*.pdf
 *~
 *.hs
 _minted*
