@@ -10,7 +10,7 @@ int main(int argc, char** argv) {
     printf("%s", str);
   }
   else
-    printf("Numero errato di argomenti!");
+    printf("Numero errato di argomenti!\n");
   
   free(str);
   
