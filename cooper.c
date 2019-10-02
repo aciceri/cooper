@@ -2,11 +2,28 @@
 #include <string.h>
 #include <stdio.h>
 
-#define ERROR(msg) {printf(msg); printf("\n"); exit(EXIT_FAILURE);}             
+static void error(char *msg) {
+  fprintf(stderr, "%s\n", msg);
+  exit(EXIT_FAILURE);
+}
 
+static void* safeMalloc(size_t size) {
+  void *p = malloc(size);
+  if (!p) error("Allocation error: out of memory");
+  return p;
+}
+
+
+static void* safeRealloc(void* p, size_t size) {
+  p = realloc(p, size);
+  if (!p) error("Allocation error: out of memory");
+  return p;
+}
+
+#define nodeNameLen 16
 
 typedef struct t_syntaxTree { //Per rappresentare gli alberi sintattici
-  char nodeName[16]; //Lunghezza massima scelta arbitrariamente
+  char nodeName[nodeNameLen]; //Lunghezza massima scelta arbitrariamente
   int nodesLen; //Numero di figli dell'albero
   struct t_syntaxTree** nodes; //Puntatore 
 } t_syntaxTree;
@@ -23,15 +40,15 @@ long int lcm(long int a, long int b) { //Minimo comune multiplo
 
 t_syntaxTree* buildTree(int first, char** tokens) { //first è l'indice del token attualmente
                                                     //considerato 
-  t_syntaxTree* tree = malloc(sizeof(t_syntaxTree));
+  t_syntaxTree* tree = safeMalloc(sizeof(t_syntaxTree));
   tree->nodes = NULL;
   int open; //Numero di parentesi aperte incontrate finora
 
   if (tokens[first][0] == '(') {
     if (tokens[first + 1][0] == ')') //Non mi aspetto cose del tipo "()"
-      ERROR("Parsing error: empty S-expression '()'");
+      error("Parsing error: empty S-expression '()'");
     if (tokens[first + 1][0] == '(') //Nemmeno del tipo "(() blah blah)"
-      ERROR("Parsing error: the root of an S-expression can't \
+      error("Parsing error: the root of an S-expression can't \
 be another non-banal S-expression, e.g. '(())' is not ok");
 
     first++; //Passo al token successivo (che in realtà è già stato consumato)
@@ -46,7 +63,7 @@ be another non-banal S-expression, e.g. '(())' is not ok");
       if (open == 1 && tokens[first][0] != ')') { //Finchè il token non è ")"
         //Chiamo ricorsivamente buildTree per allocare i figli del nodo
         tree->nodesLen++;
-        tree->nodes = realloc(tree->nodes, sizeof(t_syntaxTree*) * tree->nodesLen);
+        tree->nodes = safeRealloc(tree->nodes, sizeof(t_syntaxTree*) * tree->nodesLen);
         tree->nodes[tree->nodesLen-1] = buildTree(first, tokens);
       }
       
@@ -72,38 +89,38 @@ int isNumber(char* str) { //Controlla che str appartenga a [1-9]+[0-9]*
 void checkTree(t_syntaxTree* tree) { //Controlla che l'albero costruito soddisfi
                                      //la forma richiesta dall'algoritmo
   if (strcmp(tree->nodeName, "and")) //La radice deve essere "and"
-    ERROR("Expression error: the main expression is not an 'and'");
+    error("Expression error: the main expression is not an 'and'");
   if (tree->nodesLen == 0) { //La radice "and" deve avere almeno un figlio
-    ERROR("Expression error: the main 'and' expression \
+    error("Expression error: the main 'and' expression \
 must have at least one child");
   }
   for (int i=0; i<tree->nodesLen; i++) { //Scorro sui figli della radice ("and")
     if (strcmp(tree->nodes[i]->nodeName, "=") && //Se un figlio non è "="
         strcmp(tree->nodes[i]->nodeName, ">") && //o ">"
         strcmp(tree->nodes[i]->nodeName, "div")) //o "div"
-      ERROR("Expression error: the children of the main 'and' \
+      error("Expression error: the children of the main 'and' \
 can only be '=', '>' or 'div'");
     
     if (tree->nodes[i]->nodesLen != 2) //"=", ">" e "div" devono avere due figli
-      ERROR("Expression error: '=', '>', 'div' must have two children");
+      error("Expression error: '=', '>', 'div' must have two children");
     if (strcmp(tree->nodes[i]->nodes[0]->nodeName, "+")) //Il primo figlio di "=", ">" e
                                                          //"div" deve essere "+" mentre ...
-      ERROR("Expression error: the first child of '=', '>' or 'div' \
+      error("Expression error: the first child of '=', '>' or 'div' \
 must be '+'");
     if (!isNumber(tree->nodes[i]->nodes[1]->nodeName)) //...il secondo un numero
-      ERROR("Expression error: the second child of '=', '>', or 'div' \
+      error("Expression error: the second child of '=', '>', or 'div' \
 must be a number constant");
 
     for (int j=0; j<tree->nodes[i]->nodes[0]->nodesLen; j++) {
       if(strcmp(tree->nodes[i]->nodes[0]->nodes[j]->nodeName, "*"))
-        ERROR("Expression error: the children of '+' must be '*'");
+        error("Expression error: the children of '+' must be '*'");
       if(tree->nodes[i]->nodes[0]->nodes[j]->nodesLen == 0)
-        ERROR("Expression error: '*' must have at least one child");
+        error("Expression error: '*' must have at least one child");
       if (tree->nodes[i]->nodes[0]->nodes[j]->nodesLen != 2)
-        ERROR("Expression error: '*' must have two children");
+        error("Expression error: '*' must have two children");
       if (!isNumber(tree->nodes[i]->nodes[0]->nodes[j]->nodes[0]->nodeName) +
           isNumber(tree->nodes[i]->nodes[0]->nodes[j]->nodes[1]->nodeName) && j!=0)
-        ERROR("Expression error: the first child of '*' must \
+        error("Expression error: the first child of '*' must \
 be a number costant and the second must be a variable");
     }
   }
@@ -111,7 +128,7 @@ be a number costant and the second must be a variable");
 
 
 t_syntaxTree* parse(char* wff, int strict) { //Funzione principale di parsing
-  char* wffSpaced = malloc(sizeof(char)); //Sarà la stringa come la sringa in ingresso ma
+  char* wffSpaced = safeMalloc(sizeof(char)); //Sarà la stringa come la sringa in ingresso ma
                                           //con spazi tra i token 
   wffSpaced[0] = wff[0];
   int j = 1;
@@ -119,21 +136,21 @@ t_syntaxTree* parse(char* wff, int strict) { //Funzione principale di parsing
   for (int i = 1; i < strlen(wff) + 1; i++) { //Scorro sui caratteri della stringa in
                                               //ingresso 
     if (wff[i - 1] == '(') {
-      wffSpaced = realloc(wffSpaced, sizeof(char) * (j + 2));
+      wffSpaced = safeRealloc(wffSpaced, sizeof(char) * (j + 2));
       wffSpaced[j] = ' ';
       wffSpaced[j + 1] = wff[i];
       j += 2;
     }
     
     else if (wff[i + 1] == ')') {
-      wffSpaced = realloc(wffSpaced, sizeof(char) * (j + 2));
+      wffSpaced = safeRealloc(wffSpaced, sizeof(char) * (j + 2));
       wffSpaced[j] = wff[i];
       wffSpaced[j + 1] = ' ';
       j += 2;
     }
     
     else {
-      wffSpaced = realloc(wffSpaced, sizeof(char) * (j + 1));
+      wffSpaced = safeRealloc(wffSpaced, sizeof(char) * (j + 1));
       wffSpaced[j] = wff[i];
       j++;
     }
@@ -141,12 +158,12 @@ t_syntaxTree* parse(char* wff, int strict) { //Funzione principale di parsing
   
   char* token; //Stringa di supporto contenente un singolo token
   int nTokens = 1; //Numero dei token
-  char** tokens = malloc(sizeof(char *)); //Array dei tokens
+  char** tokens = safeMalloc(sizeof(char *)); //Array dei tokens
   tokens[0] = strtok(wffSpaced, " "); //Inserisco il primo token
   
   while ((token = strtok(NULL, " ")) != NULL) { //Finchè ce ne sono ne aggiungo
     nTokens++;
-    tokens = realloc(tokens, sizeof(char *) * nTokens);
+    tokens = safeRealloc(tokens, sizeof(char *) * nTokens);
     tokens[nTokens - 1] = token;
   }
   
@@ -155,14 +172,14 @@ t_syntaxTree* parse(char* wff, int strict) { //Funzione principale di parsing
   for(int i=0; i<nTokens; i++) { //Scorro sui tokens
     for(int j=0; j<strlen(tokens[i]); j++) //Scorro sul singolo token
       if(tokens[i][j] == ')' && j!= 0) //Se ")" non è il primo carattere di un token
-        ERROR("Parsing error: every S-expression must \
+        error("Parsing error: every S-expression must \
 have a root and at least an argument");
     if (tokens[i][0] == '(') countPar++; //Incremento il contatore
     if (tokens[i][0] == ')') countPar--; //Decremento il contatore
   }
   
   if (countPar != 0) //Alla fine ogni parentesi aperta deve essere stata chiusa
-    ERROR("Parsing error: the number of parentheses is not even");
+    error("Parsing error: the number of parentheses is not even");
   
   t_syntaxTree* syntaxTree = buildTree(0, tokens);
   
@@ -266,13 +283,13 @@ void normalize(t_syntaxTree* tree, char* var) { //Modifica i coefficienti della 
   }
   
   tree->nodesLen++;
-  tree->nodes = realloc(tree->nodes, sizeof(t_syntaxTree*) * tree->nodesLen);
-  tree->nodes[tree->nodesLen-1] = malloc(sizeof(t_syntaxTree));
+  tree->nodes = safeRealloc(tree->nodes, sizeof(t_syntaxTree*) * tree->nodesLen);
+  tree->nodes[tree->nodesLen-1] = safeMalloc(sizeof(t_syntaxTree));
   strcpy(tree->nodes[tree->nodesLen-1]->nodeName, "div");
   tree->nodes[tree->nodesLen-1]->nodesLen = 2;
-  tree->nodes[tree->nodesLen-1]->nodes = malloc(sizeof(t_syntaxTree*) * 2);
-  tree->nodes[tree->nodesLen-1]->nodes[0] = malloc(sizeof(t_syntaxTree));
-  tree->nodes[tree->nodesLen-1]->nodes[1] = malloc(sizeof(t_syntaxTree));
+  tree->nodes[tree->nodesLen-1]->nodes = safeMalloc(sizeof(t_syntaxTree*) * 2);
+  tree->nodes[tree->nodesLen-1]->nodes[0] = safeMalloc(sizeof(t_syntaxTree));
+  tree->nodes[tree->nodesLen-1]->nodes[1] = safeMalloc(sizeof(t_syntaxTree));
   tree->nodes[tree->nodesLen-1]->nodes[0]->nodesLen = 0;
   tree->nodes[tree->nodesLen-1]->nodes[0]->nodes = NULL;
   tree->nodes[tree->nodesLen-1]->nodes[1]->nodesLen = 0;
@@ -294,13 +311,13 @@ void recFree(t_syntaxTree* tree) { //Dealloca ricorsivamente tutto l'albero
 
 t_syntaxTree* recCopy(t_syntaxTree* tree) { //Effettua una copia di un albero
                                             //ricorsivamente, ovvero riallocando tutto
-  t_syntaxTree* t = malloc(sizeof(t_syntaxTree));
+  t_syntaxTree* t = safeMalloc(sizeof(t_syntaxTree));
   t->nodesLen = tree->nodesLen;
 
   if (t->nodesLen == 0)
     t->nodes = NULL;
   else
-    t->nodes = malloc(sizeof(t_syntaxTree*) * t->nodesLen);
+    t->nodes = safeMalloc(sizeof(t_syntaxTree*) * t->nodesLen);
   
   strcpy(t->nodeName, tree->nodeName);
   
@@ -315,7 +332,7 @@ t_syntaxTree* recCopy(t_syntaxTree* tree) { //Effettua una copia di un albero
 t_syntaxTree* minInf(t_syntaxTree* tree, char* var) { //Calcola $\varphi_{- \infty}$
   t_syntaxTree* nTree = recCopy(tree); //La funzione lavora su una copia dell'albero
 
-  char minvar[16]; //La variabile con "-" davanti
+  char minvar[nodeNameLen]; //La variabile con "-" davanti
   minvar[0] = '\0';
   strcpy(minvar, "-");
   strcat(minvar, var);
@@ -365,15 +382,15 @@ void eval(t_syntaxTree* tree, char* var, t_syntaxTree* val) {
       tree->nodes[i] = recCopy(val); //... sostituisco con una copia di val
     }
     else { //Nel caso non trovi var potrei comunque ancora trovare var con "-" davanti
-      char mvar[17] = "-"; //E' var con "-" davanti
+      char mvar[nodeNameLen + 1] = "-"; //E' var con "-" davanti
       strcat(mvar, var);
       if (strcmp(tree->nodes[i]->nodeName, mvar) == 0) { //Se trovo var con "-" davanti
         recFree(tree->nodes[i]); //Dealloco tutto
         //Creo un nuovo nodo "-" contenente val come unico figlio
-        tree->nodes[i] = malloc(sizeof(t_syntaxTree));
+        tree->nodes[i] = safeMalloc(sizeof(t_syntaxTree));
         strcpy(tree->nodes[i]->nodeName, "-");
         tree->nodes[i]->nodesLen = 1;
-        tree->nodes[i]->nodes = malloc(sizeof(t_syntaxTree*));
+        tree->nodes[i]->nodes = safeMalloc(sizeof(t_syntaxTree*));
         tree->nodes[i]->nodes[0] = recCopy(val);
       }
     }
@@ -411,9 +428,9 @@ int calcm(t_syntaxTree* tree, char* var) { //Calcolo il minimo comune multiplo d
 
 
 t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) { //Calcolo dei bounday points
-  char str[16];
+  char str[nodeNameLen];
   str[0] = '\0';
-  t_syntaxTree* bPoints = malloc(sizeof(t_syntaxTree)); //Salvo i boundary points in un
+  t_syntaxTree* bPoints = safeMalloc(sizeof(t_syntaxTree)); //Salvo i boundary points in un
                                                         //albero
   bPoints->nodes = NULL;
   strcpy(bPoints->nodeName, "bPoints"); //Nome utile solo per il debugging
@@ -426,9 +443,9 @@ t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) { //Calcolo dei boun
       for (int j=0; j<tree->nodes[i]->nodes[0]->nodesLen; j++) { //Scorro sugli addendi
         if (strcmp(var, addends[j]->nodeName) == 0) { //Se trovo la variabile
           bPoints->nodesLen++; //Aggiungo un boundary point
-          bPoints->nodes = realloc(bPoints->nodes,
+          bPoints->nodes = safeRealloc(bPoints->nodes,
                                    sizeof(t_syntaxTree *) * bPoints->nodesLen);
-          t_syntaxTree* bp = malloc(sizeof(t_syntaxTree));
+          t_syntaxTree* bp = safeMalloc(sizeof(t_syntaxTree));
           bp->nodes = NULL;
           strcpy(bp->nodeName, "+");
           bp->nodesLen = 0;
@@ -436,7 +453,7 @@ t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) { //Calcolo dei boun
           for (int k=0; k<tree->nodes[i]->nodes[0]->nodesLen; k++) { //Scorro sugli addendi
             if (strcmp(var, addends[k]->nodeName) != 0) { //Se non sono sulla variabile
               bp->nodesLen++; //Aggiungo comunque
-              bp->nodes = realloc(bp->nodes, sizeof(t_syntaxTree*) * bp->nodesLen);
+              bp->nodes = safeRealloc(bp->nodes, sizeof(t_syntaxTree*) * bp->nodesLen);
               bp->nodes[bp->nodesLen-1] = recCopy(addends[k]);
               
               sprintf(str, "%d", -atoi(bp->nodes[bp->nodesLen-1]->nodes[0]->nodeName));
@@ -445,8 +462,8 @@ t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) { //Calcolo dei boun
           }
           
           bp->nodesLen++;
-          bp->nodes = realloc(bp->nodes, sizeof(t_syntaxTree*) * bp->nodesLen);
-          bp->nodes[bp->nodesLen-1] = malloc(sizeof(t_syntaxTree));
+          bp->nodes = safeRealloc(bp->nodes, sizeof(t_syntaxTree*) * bp->nodesLen);
+          bp->nodes[bp->nodesLen-1] = safeMalloc(sizeof(t_syntaxTree));
           bp->nodes[bp->nodesLen - 1]->nodesLen = 0;
           bp->nodes[bp->nodesLen - 1]->nodes = NULL;
           sprintf(str, "%d", -1+atoi(tree->nodes[i]->nodes[1]->nodeName));
@@ -464,9 +481,9 @@ t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) { //Calcolo dei boun
       for (int j=0; j<tree->nodes[i]->nodes[0]->nodesLen; j++) {
         if (strcmp(var, addends[j]->nodeName) == 0) {
           bPoints->nodesLen++;
-          bPoints->nodes = realloc(bPoints->nodes,
+          bPoints->nodes = safeRealloc(bPoints->nodes,
                                    sizeof(t_syntaxTree *) * bPoints->nodesLen);
-          t_syntaxTree* bp = malloc(sizeof(t_syntaxTree));
+          t_syntaxTree* bp = safeMalloc(sizeof(t_syntaxTree));
           bp->nodes = NULL;
           strcpy(bp->nodeName, "+");
           bp->nodesLen = 0;
@@ -474,7 +491,7 @@ t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) { //Calcolo dei boun
           for (int k=0; k<tree->nodes[i]->nodes[0]->nodesLen; k++) {
             if (strcmp(var, addends[k]->nodeName) != 0) {
               bp->nodesLen++;
-              bp->nodes = realloc(bp->nodes, sizeof(t_syntaxTree*) * bp->nodesLen);
+              bp->nodes = safeRealloc(bp->nodes, sizeof(t_syntaxTree*) * bp->nodesLen);
               bp->nodes[bp->nodesLen-1] = recCopy(addends[k]);
               sprintf(str, "%d", -atoi(bp->nodes[bp->nodesLen-1]->nodes[0]->nodeName));
               strcpy(bp->nodes[bp->nodesLen-1]->nodes[0]->nodeName, str);
@@ -482,8 +499,8 @@ t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) { //Calcolo dei boun
           }
           
           bp->nodesLen++;
-          bp->nodes = realloc(bp->nodes, sizeof(t_syntaxTree*) * bp->nodesLen);
-          bp->nodes[bp->nodesLen-1] = malloc(sizeof(t_syntaxTree));
+          bp->nodes = safeRealloc(bp->nodes, sizeof(t_syntaxTree*) * bp->nodesLen);
+          bp->nodes[bp->nodesLen-1] = safeMalloc(sizeof(t_syntaxTree));
           bp->nodes[bp->nodesLen - 1]->nodesLen = 0;
           bp->nodes[bp->nodesLen - 1]->nodes = NULL;
           sprintf(str, "%d", +atoi(tree->nodes[i]->nodes[1]->nodeName));
@@ -504,8 +521,8 @@ t_syntaxTree* boundaryPoints(t_syntaxTree* tree, char* var) { //Calcolo dei boun
 t_syntaxTree* newFormula(t_syntaxTree* tree, t_syntaxTree* minf, char* var) {
   int m = calcm(minf, var); //Minimo comune multiplo dei coefficienti di var
   t_syntaxTree* val;
-  char str[16];
-  t_syntaxTree* nTree = malloc(sizeof(t_syntaxTree)); //Nuovo albero che verrà restituito
+  char str[nodeNameLen];
+  t_syntaxTree* nTree = safeMalloc(sizeof(t_syntaxTree)); //Nuovo albero che verrà restituito
   strcpy(nTree->nodeName, "or"); //La radice del nuovo albero è un "or"
   nTree->nodesLen = 0;
   nTree->nodes = NULL;
@@ -517,9 +534,9 @@ t_syntaxTree* newFormula(t_syntaxTree* tree, t_syntaxTree* minf, char* var) {
   //La seguente è semplicemente una applicazione della formula del teorema
   for(int i=1; i<=m; i++) { 
     nTree->nodesLen++;
-    nTree->nodes = realloc(nTree->nodes, sizeof(t_syntaxTree *) * nTree->nodesLen);
+    nTree->nodes = safeRealloc(nTree->nodes, sizeof(t_syntaxTree *) * nTree->nodesLen);
     t = recCopy(minf);
-    val = malloc(sizeof(t_syntaxTree));
+    val = safeMalloc(sizeof(t_syntaxTree));
     sprintf(str, "%d", i);
     strcpy(val->nodeName, str);
     val->nodesLen = 0;
@@ -530,7 +547,7 @@ t_syntaxTree* newFormula(t_syntaxTree* tree, t_syntaxTree* minf, char* var) {
 
     for(int j=0; j<bPts->nodesLen; j++) {
       nTree->nodesLen++;
-      nTree->nodes = realloc(nTree->nodes, sizeof(t_syntaxTree *) * nTree->nodesLen);
+      nTree->nodes = safeRealloc(nTree->nodes, sizeof(t_syntaxTree *) * nTree->nodesLen);
       t = recCopy(tree);
       bp = recCopy(bPts->nodes[j]);
       sprintf(str, "%d", i+atoi(bp->nodes[bp->nodesLen-1]->nodeName));
@@ -592,7 +609,7 @@ int recTreeToStr(t_syntaxTree* t, char** str, int len) { //Trasforma un albero s
                                                          //una stringa
   if (t->nodesLen == 0) { //Se il nodo attuale non ha figli
     int nLen = len + strlen(t->nodeName); //Aggiorna la lunghezza della stringa prodotta
-    *str = realloc(*str, sizeof(char) * nLen); //Rialloca la stringa
+    *str = safeRealloc(*str, sizeof(char) * nLen); //Rialloca la stringa
     strcat(*str, t->nodeName); //Aggiungi alla stringa il nome del nodo
     return nLen;
   }
@@ -600,19 +617,19 @@ int recTreeToStr(t_syntaxTree* t, char** str, int len) { //Trasforma un albero s
   else { //Se invece il nodo attuale ha figli
     int nLen = len + strlen(t->nodeName) + 1; //Aggiorna la lunghezza della stringa prodotta
                                               //considerando anche la parentesi "("
-    *str = realloc(*str, sizeof(char) * nLen); //Rialloca la stringa
+    *str = safeRealloc(*str, sizeof(char) * nLen); //Rialloca la stringa
     strcat(*str, "("); //Aggiungi alla stringa "(" ...
     strcat(*str, t->nodeName); //... e il nome del nodo
     
     for (int i=0; i<t->nodesLen; i++) { //Per ogni figlio del nodo attuale
       nLen++; //A causa dello spazio " "
-      *str = realloc(*str, sizeof(char) * nLen); //Rialloca la stringa
+      *str = safeRealloc(*str, sizeof(char) * nLen); //Rialloca la stringa
       strcat(*str, " "); //Aggiungi lo spazio
       nLen = recTreeToStr(t->nodes[i], str, nLen); //Scarica ricorsivamente
     }
     
     nLen++; //A causa della parentesi ")"
-    *str = realloc(*str, sizeof(char) * nLen); //Rialloca la stringa
+    *str = safeRealloc(*str, sizeof(char) * nLen); //Rialloca la stringa
     strcat(*str, ")"); //Aggiungi la parentesi ")"
 
     return nLen; //Ritorna quanti caratteri è diventata adesso, utile per la ricorsione
@@ -622,7 +639,7 @@ int recTreeToStr(t_syntaxTree* t, char** str, int len) { //Trasforma un albero s
 
 char* treeToStr(t_syntaxTree* tree) { //Funzione inversa di parse(), in realtà è un wrapper
                                       //non ricorsivo di recTreeToStr()
-  char* str=malloc(sizeof(char));
+  char* str=safeMalloc(sizeof(char));
   str[0] = '\0'; //Le stringhe finiscono con '\0' in C
   recTreeToStr(tree, &str, 1);
   return str;
@@ -634,12 +651,12 @@ void adjustForYices(t_syntaxTree* t) { //Aggiusta gli alberi in modo che siano p
     if (strcmp(t->nodes[i]->nodeName, "div") == 0) { //Se trovo un "div" ...
       t_syntaxTree* pt = t->nodes[i];
       strcpy(pt->nodeName, "mod"); //... lo sostituisco con un "mod"
-      t->nodes[i] = malloc(sizeof(t_syntaxTree));
+      t->nodes[i] = safeMalloc(sizeof(t_syntaxTree));
       strcpy(t->nodes[i]->nodeName, "=");
       t->nodes[i]->nodesLen = 2;
-      t->nodes[i]->nodes = malloc(sizeof(t_syntaxTree*) * 2);
+      t->nodes[i]->nodes = safeMalloc(sizeof(t_syntaxTree*) * 2);
       t->nodes[i]->nodes[0] = pt;
-      t->nodes[i]->nodes[1] = malloc(sizeof(t_syntaxTree));
+      t->nodes[i]->nodes[1] = safeMalloc(sizeof(t_syntaxTree));
       strcpy(t->nodes[i]->nodes[1]->nodeName, "0");
       t->nodes[i]->nodes[1]->nodesLen = 0;
       t->nodes[i]->nodes[1]->nodes = NULL;
@@ -688,11 +705,11 @@ char** cooperToArray(char* wff, char* var, int* len) {
 
   *len = f->nodesLen;
 
-  array = malloc(sizeof(char*) * *len);
+  array = safeMalloc(sizeof(char*) * *len);
 
   for (int i=0; i<*len; i++) {
     buffer = treeToStr(f->nodes[i]);
-    array[i] = malloc(sizeof(char) * strlen(buffer));
+    array[i] = safeMalloc(sizeof(char) * strlen(buffer));
     strcpy(array[i], buffer);
     free(buffer);
   }

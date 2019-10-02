@@ -8,11 +8,10 @@ int main(int argc, char** argv) {
   if (argc == 3) {
     str = cooperToStr(argv[1], argv[2]);
     printf("%s", str);
+    free(str);
   }
   else
     printf("Numero errato di argomenti!\n");
-  
-  free(str);
   
   return 0;
 }
